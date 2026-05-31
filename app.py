@@ -12,9 +12,16 @@ st.set_page_config(
 
 SHEET_NAME = "StudyProgressDB"
 
-# =====================
-# Google Sheets 接続
-# =====================
+WEEKDAY_MAP = {
+    0: "月",
+    1: "火",
+    2: "水",
+    3: "木",
+    4: "金",
+    5: "土",
+    6: "日",
+}
+
 
 @st.cache_resource
 def connect_sheets():
@@ -49,40 +56,24 @@ def next_id(df, id_col):
         return 1
 
     ids = pd.to_numeric(df[id_col], errors="coerce").fillna(0)
-
-    if ids.empty:
-        return 1
-
     return int(ids.max()) + 1
 
 
 def update_question_row(ws, questions_df, question_id, new_values):
-    target = questions_df[questions_df["question_id"].astype(str) == str(question_id)]
+    target = questions_df[
+        questions_df["question_id"].astype(str) == str(question_id)
+    ]
 
     if target.empty:
         return False
 
-    df_index = target.index[0]
-    sheet_row = df_index + 2
+    sheet_row = target.index[0] + 2
 
     for col_name, value in new_values.items():
+        if col_name not in questions_df.columns:
+            continue
+
         col_index = list(questions_df.columns).index(col_name) + 1
-        ws.update_cell(sheet_row, col_index, value)
-
-    return True
-
-
-def update_material_row(ws, materials_df, material_id, new_values):
-    target = materials_df[materials_df["material_id"].astype(str) == str(material_id)]
-
-    if target.empty:
-        return False
-
-    df_index = target.index[0]
-    sheet_row = df_index + 2
-
-    for col_name, value in new_values.items():
-        col_index = list(materials_df.columns).index(col_name) + 1
         ws.update_cell(sheet_row, col_index, value)
 
     return True
@@ -92,35 +83,15 @@ def get_material_name(materials_df, material_id):
     if materials_df.empty:
         return ""
 
-    target = materials_df[materials_df["material_id"].astype(str) == str(material_id)]
+    target = materials_df[
+        materials_df["material_id"].astype(str) == str(material_id)
+    ]
 
     if target.empty:
         return ""
 
     row = target.iloc[0]
     return f'{row["subject"]}｜{row["material_name"]}'
-
-
-# =====================
-# データ読み込み
-# =====================
-
-sheets = connect_sheets()
-
-materials_df = load_sheet(sheets["materials"])
-questions_df = load_sheet(sheets["questions"])
-logs_df = load_sheet(sheets["logs"])
-tasks_df = load_sheet(sheets["daily_tasks"])
-
-WEEKDAY_MAP = {
-    0: "月",
-    1: "火",
-    2: "水",
-    3: "木",
-    4: "金",
-    5: "土",
-    6: "日",
-}
 
 
 def count_study_days_until(target_date, study_days):
@@ -154,16 +125,10 @@ def generate_today_tasks(materials_df, questions_df, tasks_df, sheets):
     today_str = str(today)
     new_rows = []
 
-    # 既存の今日タスクを二重作成しない
-    existing_today = tasks_df[
-        tasks_df["task_date"].astype(str) == today_str
-    ] if not tasks_df.empty else pd.DataFrame()
-
     for _, material in materials_df.iterrows():
         material_id = material["material_id"]
         study_days = str(material["study_days"]).split(",")
 
-        # 今日がその教材の曜日でなければスキップ
         if WEEKDAY_MAP[today.weekday()] not in study_days:
             continue
 
@@ -174,10 +139,12 @@ def generate_today_tasks(materials_df, questions_df, tasks_df, sheets):
         if qs.empty:
             continue
 
-        qs["question_number"] = pd.to_numeric(qs["question_number"], errors="coerce")
+        qs["question_number"] = pd.to_numeric(
+            qs["question_number"],
+            errors="coerce"
+        )
         qs = qs.sort_values("question_number")
 
-        # 1. 今日が復習日の問題
         review_qs = qs[
             qs["next_review_date"].astype(str) == today_str
         ]
@@ -192,7 +159,6 @@ def generate_today_tasks(materials_df, questions_df, tasks_df, sheets):
                     "未完了"
                 ])
 
-        # 2. 苦手問題
         weak_qs = qs[
             qs["status"].astype(str) == "苦手"
         ]
@@ -207,7 +173,6 @@ def generate_today_tasks(materials_df, questions_df, tasks_df, sheets):
                     "未完了"
                 ])
 
-        # 3. 新規問題
         unstarted_qs = qs[
             qs["status"].astype(str).isin(["未着手", "学習中"])
         ]
@@ -217,12 +182,11 @@ def generate_today_tasks(materials_df, questions_df, tasks_df, sheets):
 
         try:
             target = pd.to_datetime(material["target_date"]).date()
-        except:
+        except Exception:
             target = today
 
         remaining_questions = len(unstarted_qs)
         remaining_days = count_study_days_until(target, study_days)
-
         new_count = max(1, -(-remaining_questions // remaining_days))
 
         new_qs = unstarted_qs.head(new_count)
@@ -242,8 +206,21 @@ def generate_today_tasks(materials_df, questions_df, tasks_df, sheets):
 
     return len(new_rows)
 
+
 # =====================
-# タイトル
+# データ読み込み
+# =====================
+
+sheets = connect_sheets()
+
+materials_df = load_sheet(sheets["materials"])
+questions_df = load_sheet(sheets["questions"])
+logs_df = load_sheet(sheets["logs"])
+tasks_df = load_sheet(sheets["daily_tasks"])
+
+
+# =====================
+# 画面
 # =====================
 
 st.title("📚 Study Progress")
@@ -257,6 +234,7 @@ tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
     "📊 進捗",
     "📁 データ確認"
 ])
+
 
 # =====================
 # 今日のタスク
@@ -306,7 +284,8 @@ with tab1:
             merged = today_tasks.merge(
                 questions_df,
                 on="question_id",
-                how="left"
+                how="left",
+                suffixes=("_task", "_question")
             )
 
             merged["教材"] = merged["material_id"].apply(
@@ -318,27 +297,36 @@ with tab1:
                 errors="coerce"
             )
 
-            merged = merged.sort_values(["priority", "教材", "question_number"])
+            merged = merged.sort_values(
+                ["priority", "教材", "question_number"]
+            )
 
             st.markdown("### 今日のタスクリスト")
 
             for _, row in merged.iterrows():
+                task_status = row.get("status_task", "未完了")
+                question_status = row.get("status_question", "")
+
                 with st.container(border=True):
                     st.markdown(
                         f"### {row['教材']}　第{int(row['question_number'])}問"
                     )
 
-                    st.write(f"**種類：** {row['task_type']}")
-                    st.write(f"**状態：** {row['status']}")
+                    st.write(f"**種類：** {row.get('task_type', '')}")
+                    st.write(f"**タスク状態：** {task_status}")
+
+                    if question_status:
+                        st.write(f"**問題状態：** {question_status}")
 
                     if str(row.get("issue", "")) != "":
-                        st.write(f"**論点：** {row['issue']}")
+                        st.write(f"**論点：** {row.get('issue', '')}")
 
                     if str(row.get("tags", "")) != "":
-                        st.write(f"**タグ：** {row['tags']}")
+                        st.write(f"**タグ：** {row.get('tags', '')}")
 
                     if str(row.get("user_note", "")) != "":
-                        st.write(f"**メモ：** {row['user_note']}")
+                        st.write(f"**メモ：** {row.get('user_note', '')}")
+
 
 # =====================
 # 教材登録
@@ -380,11 +368,7 @@ with tab2:
 
                 sheets["materials"].append_row(material_row)
 
-                if questions_df.empty:
-                    next_question_id = 1
-                else:
-                    next_question_id = next_id(questions_df, "question_id")
-
+                next_question_id = next_id(questions_df, "question_id")
                 question_rows = []
 
                 for i in range(1, int(total_questions) + 1):
@@ -405,7 +389,9 @@ with tab2:
 
                 sheets["questions"].append_rows(question_rows)
 
-                st.success(f"教材を登録し、第1問〜第{int(total_questions)}問を自動生成しました。")
+                st.success(
+                    f"教材を登録し、第1問〜第{int(total_questions)}問を自動生成しました。"
+                )
                 st.rerun()
 
     st.divider()
@@ -415,6 +401,7 @@ with tab2:
         st.info("まだ教材が登録されていません。")
     else:
         st.dataframe(materials_df, use_container_width=True)
+
 
 # =====================
 # 問題一覧・編集
@@ -450,11 +437,7 @@ with tab3:
         filtered_questions = filtered_questions.sort_values("question_number")
 
         st.markdown("### 問題一覧")
-
-        st.dataframe(
-            filtered_questions,
-            use_container_width=True
-        )
+        st.dataframe(filtered_questions, use_container_width=True)
 
         st.divider()
         st.markdown("### 問題詳細を編集")
@@ -475,45 +458,53 @@ with tab3:
             questions_df["question_id"].astype(str) == str(selected_question_id)
         ].iloc[0]
 
+        status_options = ["未着手", "学習中", "復習待ち", "苦手", "完了"]
+
         with st.form("edit_question_form"):
+            current_status = selected_question.get("status", "未着手")
+
             status = st.selectbox(
                 "状態",
-                ["未着手", "学習中", "復習待ち", "苦手", "完了"],
-                index=["未着手", "学習中", "復習待ち", "苦手", "完了"].index(
-                    selected_question["status"]
-                ) if selected_question["status"] in ["未着手", "学習中", "復習待ち", "苦手", "完了"] else 0
+                status_options,
+                index=status_options.index(current_status)
+                if current_status in status_options else 0
             )
+
+            current_round = selected_question.get("round", 1)
 
             round_num = st.number_input(
                 "周回数",
                 min_value=1,
                 step=1,
-                value=int(selected_question["round"]) if str(selected_question["round"]).isdigit() else 1
+                value=int(current_round) if str(current_round).isdigit() else 1
             )
 
             issue = st.text_input(
                 "論点",
-                value=str(selected_question["issue"]) if "issue" in selected_question else "",
+                value=str(selected_question.get("issue", "")),
                 placeholder="例：政教分離、目的効果基準"
             )
 
             tags = st.text_input(
                 "タグ・関連過去問",
-                value=str(selected_question["tags"]) if "tags" in selected_question else "",
+                value=str(selected_question.get("tags", "")),
                 placeholder="例：司法H15, 慶應2019"
             )
 
             user_note = st.text_area(
                 "メモ",
-                value=str(selected_question["user_note"]) if "user_note" in selected_question else "",
+                value=str(selected_question.get("user_note", "")),
                 placeholder="例：玉串料判決との違いに注意"
             )
+
+            current_difficulty = selected_question.get("difficulty", 3)
 
             difficulty = st.slider(
                 "苦手度・難易度",
                 min_value=1,
                 max_value=5,
-                value=int(selected_question["difficulty"]) if str(selected_question["difficulty"]).isdigit() else 3
+                value=int(current_difficulty)
+                if str(current_difficulty).isdigit() else 3
             )
 
             next_review_date = st.date_input(
@@ -544,6 +535,7 @@ with tab3:
                     st.rerun()
                 else:
                     st.error("更新対象の問題が見つかりませんでした。")
+
 
 # =====================
 # 学習記録
@@ -580,7 +572,7 @@ with tab4:
         filtered_questions_log = filtered_questions_log.sort_values("question_number")
 
         question_options_log = {
-            f'第{int(row["question_number"])}問｜論点:{row["issue"]}': row["question_id"]
+            f'第{int(row["question_number"])}問｜論点:{row.get("issue", "")}': row["question_id"]
             for _, row in filtered_questions_log.iterrows()
         }
 
@@ -631,7 +623,8 @@ with tab4:
                     questions_df["question_id"].astype(str) == str(selected_question_id_log)
                 ].iloc[0]
 
-                current_round = int(selected_q["round"]) if str(selected_q["round"]).isdigit() else 1
+                current_round = selected_q.get("round", 1)
+                current_round = int(current_round) if str(current_round).isdigit() else 1
 
                 if result == "できた":
                     new_status = "復習待ち"
@@ -669,6 +662,7 @@ with tab4:
         st.info("まだ学習ログがありません。")
     else:
         st.dataframe(logs_df.tail(20), use_container_width=True)
+
 
 # =====================
 # 進捗
@@ -713,7 +707,6 @@ with tab5:
             c4.metric("苦手", weak)
 
             st.progress(progress)
-
             st.caption(f"着手率：{round(progress * 100, 1)}%")
 
             weak_qs = qs[qs["status"].astype(str) == "苦手"]
@@ -722,21 +715,23 @@ with tab5:
                 with st.expander("苦手問題を見る"):
                     st.dataframe(weak_qs, use_container_width=True)
 
+
 # =====================
 # データ確認
 # =====================
 
 with tab6:
     st.subheader("📁 データ確認")
+    st.caption("アプリで管理しているデータを確認できます。")
 
-    st.markdown("### materials")
+    st.markdown("### 📘 materials")
     st.dataframe(materials_df, use_container_width=True)
 
-    st.markdown("### questions")
+    st.markdown("### 📝 questions")
     st.dataframe(questions_df, use_container_width=True)
 
-    st.markdown("### logs")
+    st.markdown("### 🌙 logs")
     st.dataframe(logs_df, use_container_width=True)
 
-    st.markdown("### daily_tasks")
+    st.markdown("### 📅 daily_tasks")
     st.dataframe(tasks_df, use_container_width=True)
