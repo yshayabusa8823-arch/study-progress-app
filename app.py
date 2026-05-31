@@ -255,7 +255,7 @@ tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
     "📝 問題一覧・編集",
     "🌙 学習記録",
     "📊 進捗",
-    "🗂 データ確認"
+    "📁 データ確認"
 ])
 
 # =====================
@@ -727,7 +727,7 @@ with tab5:
 # =====================
 
 with tab6:
-    st.subheader("🗂 データ確認")
+    st.subheader("📁 データ確認")
 
     st.markdown("### materials")
     st.dataframe(materials_df, use_container_width=True)
