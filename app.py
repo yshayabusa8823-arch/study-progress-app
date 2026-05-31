@@ -89,14 +89,29 @@ def update_question_row(ws, questions_df, question_id, new_values):
     if target.empty:
         return False
 
-    sheet_row = target.index[0] + 2
+    df_index = target.index[0]
+    sheet_row = df_index + 2
+
+    row_values = ws.row_values(sheet_row)
+
+    headers = list(questions_df.columns)
+
+    while len(row_values) < len(headers):
+        row_values.append("")
 
     for col_name, value in new_values.items():
-        if col_name not in questions_df.columns:
+        if col_name not in headers:
             continue
 
-        col_index = list(questions_df.columns).index(col_name) + 1
-        ws.update_cell(sheet_row, col_index, value)
+        col_index = headers.index(col_name)
+        row_values[col_index] = value
+
+    end_col = chr(ord("A") + len(headers) - 1)
+
+    ws.update(
+        f"A{sheet_row}:{end_col}{sheet_row}",
+        [row_values]
+    )
 
     return True
 
