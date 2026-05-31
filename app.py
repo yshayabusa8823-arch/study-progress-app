@@ -971,6 +971,8 @@ with tab_record:
                 show_result_effect(result)
 
     st.divider()
+
+    logs_df = load_sheet(sheets["logs"])
     st.markdown("### 最近の記録")
 
     if logs_df.empty:
