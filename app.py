@@ -23,6 +23,8 @@ WEEKDAY_MAP = {
     6: "日",
 }
 
+WEEKDAYS = ["月", "火", "水", "木", "金", "土", "日"]
+
 
 @st.cache_resource
 def connect_sheets():
@@ -66,6 +68,14 @@ def safe_str(value):
     return str(value)
 
 
+def col_letter(n):
+    result = ""
+    while n:
+        n, rem = divmod(n - 1, 26)
+        result = chr(65 + rem) + result
+    return result
+
+
 def get_material_name(materials_df, material_id):
     if materials_df.empty:
         return ""
@@ -92,9 +102,8 @@ def update_question_row(ws, questions_df, question_id, new_values):
     df_index = target.index[0]
     sheet_row = df_index + 2
 
-    row_values = ws.row_values(sheet_row)
-
     headers = list(questions_df.columns)
+    row_values = ws.row_values(sheet_row)
 
     while len(row_values) < len(headers):
         row_values.append("")
@@ -106,7 +115,41 @@ def update_question_row(ws, questions_df, question_id, new_values):
         col_index = headers.index(col_name)
         row_values[col_index] = value
 
-    end_col = chr(ord("A") + len(headers) - 1)
+    end_col = col_letter(len(headers))
+
+    ws.update(
+        f"A{sheet_row}:{end_col}{sheet_row}",
+        [row_values]
+    )
+
+    return True
+
+
+def update_material_row(ws, materials_df, material_id, new_values):
+    target = materials_df[
+        materials_df["material_id"].astype(str) == str(material_id)
+    ]
+
+    if target.empty:
+        return False
+
+    df_index = target.index[0]
+    sheet_row = df_index + 2
+
+    headers = list(materials_df.columns)
+    row_values = ws.row_values(sheet_row)
+
+    while len(row_values) < len(headers):
+        row_values.append("")
+
+    for col_name, value in new_values.items():
+        if col_name not in headers:
+            continue
+
+        col_index = headers.index(col_name)
+        row_values[col_index] = value
+
+    end_col = col_letter(len(headers))
 
     ws.update(
         f"A{sheet_row}:{end_col}{sheet_row}",
@@ -129,13 +172,27 @@ def update_task_status(ws, tasks_df, task_date, question_id, task_type, new_stat
     if target.empty:
         return False
 
-    sheet_row = target.index[0] + 2
+    df_index = target.index[0]
+    sheet_row = df_index + 2
 
-    if "status" not in tasks_df.columns:
+    headers = list(tasks_df.columns)
+    row_values = ws.row_values(sheet_row)
+
+    while len(row_values) < len(headers):
+        row_values.append("")
+
+    if "status" not in headers:
         return False
 
-    col_index = list(tasks_df.columns).index("status") + 1
-    ws.update_cell(sheet_row, col_index, new_status)
+    status_index = headers.index("status")
+    row_values[status_index] = new_status
+
+    end_col = col_letter(len(headers))
+
+    ws.update(
+        f"A{sheet_row}:{end_col}{sheet_row}",
+        [row_values]
+    )
 
     return True
 
@@ -176,7 +233,7 @@ def generate_today_tasks(materials_df, questions_df, tasks_df, sheets):
 
     for _, material in materials_df.iterrows():
         material_id = material["material_id"]
-        study_days = str(material["study_days"]).split(",")
+        study_days = safe_str(material["study_days"]).split(",")
 
         if WEEKDAY_MAP[today.weekday()] not in study_days:
             continue
@@ -379,6 +436,10 @@ def show_result_effect(result):
     st.rerun()
 
 
+# =====================
+# データ読み込み
+# =====================
+
 sheets = connect_sheets()
 
 materials_df = load_sheet(sheets["materials"])
@@ -386,6 +447,10 @@ questions_df = load_sheet(sheets["questions"])
 logs_df = load_sheet(sheets["logs"])
 tasks_df = load_sheet(sheets["daily_tasks"])
 
+
+# =====================
+# CSS
+# =====================
 
 st.markdown(
     """
@@ -455,6 +520,10 @@ st.markdown(
 )
 
 
+# =====================
+# 画面
+# =====================
+
 st.markdown("# 📚 Study Progress")
 st.caption("問題単位で進捗・復習・翌日のタスクを管理するアプリ")
 
@@ -466,6 +535,10 @@ tab_today, tab_material, tab_questions, tab_record, tab_progress = st.tabs([
     "進捗"
 ])
 
+
+# =====================
+# 今日
+# =====================
 
 with tab_today:
     st.subheader("🏠 今日やること")
@@ -568,10 +641,10 @@ with tab_today:
                         priority = 1 if manual_task_type in ["復習", "やり直し"] else 3
 
                         sheets["daily_tasks"].append_row([
-                            str(today_str),
-                            str(qid),
-                            str(manual_task_type),
-                            str(priority),
+                            today_str,
+                            qid,
+                            manual_task_type,
+                            priority,
                             "未完了"
                         ])
 
@@ -582,7 +655,6 @@ with tab_today:
 
     st.divider()
 
-    tasks_df = load_sheet(sheets["daily_tasks"])
     today_tasks_df = build_today_tasks_df(tasks_df, questions_df, materials_df)
 
     if today_tasks_df.empty:
@@ -685,6 +757,10 @@ with tab_today:
                         show_result_effect(result)
 
 
+# =====================
+# 教材
+# =====================
+
 with tab_material:
     st.subheader("📘 教材を登録")
 
@@ -696,7 +772,7 @@ with tab_material:
 
         study_days = st.multiselect(
             "この教材に触れる曜日",
-            ["月", "火", "水", "木", "金", "土", "日"],
+            WEEKDAYS,
             default=["月", "水", "金"]
         )
 
@@ -751,18 +827,110 @@ with tab_material:
                 st.rerun()
 
     st.divider()
-    st.markdown("### 登録済み教材")
+    st.markdown("### 登録済み教材を編集")
 
     if materials_df.empty:
         st.info("まだ教材がありません。")
     else:
-        for _, row in materials_df.iterrows():
-            with st.container(border=True):
-                st.markdown(f"**{row['subject']}｜{row['material_name']}**")
-                st.caption(
-                    f"総問題数：{row['total_questions']} / 目標：{row['target_date']} / 曜日：{row['study_days']}"
+        material_edit_options = {
+            f'{row["subject"]}｜{row["material_name"]}': row["material_id"]
+            for _, row in materials_df.iterrows()
+        }
+
+        selected_material_edit_label = st.selectbox(
+            "編集する教材",
+            list(material_edit_options.keys()),
+            key="edit_material_select"
+        )
+
+        selected_material_edit_id = material_edit_options[selected_material_edit_label]
+
+        selected_material = materials_df[
+            materials_df["material_id"].astype(str) == str(selected_material_edit_id)
+        ].iloc[0]
+
+        current_days = safe_str(selected_material.get("study_days", "")).split(",")
+        current_days = [d for d in current_days if d in WEEKDAYS]
+
+        with st.container(border=True):
+            st.markdown(
+                f"**現在：{selected_material['subject']}｜{selected_material['material_name']}**"
+            )
+
+            with st.form("edit_material_form"):
+                edit_subject = st.text_input(
+                    "科目",
+                    value=safe_str(selected_material.get("subject", ""))
                 )
 
+                edit_material_name = st.text_input(
+                    "教材名",
+                    value=safe_str(selected_material.get("material_name", ""))
+                )
+
+                edit_total_questions = st.number_input(
+                    "総問題数",
+                    min_value=1,
+                    step=1,
+                    value=int(selected_material["total_questions"])
+                    if str(selected_material["total_questions"]).isdigit() else 1
+                )
+
+                try:
+                    current_target_date = pd.to_datetime(
+                        selected_material["target_date"]
+                    ).date()
+                except Exception:
+                    current_target_date = date.today()
+
+                edit_target_date = st.date_input(
+                    "目標完了日",
+                    value=current_target_date
+                )
+
+                edit_study_days = st.multiselect(
+                    "この教材に触れる曜日",
+                    WEEKDAYS,
+                    default=current_days if current_days else ["月", "水", "金"]
+                )
+
+                submitted_edit_material = st.form_submit_button(
+                    "教材情報を保存",
+                    use_container_width=True
+                )
+
+                if submitted_edit_material:
+                    if edit_subject.strip() == "" or edit_material_name.strip() == "":
+                        st.error("科目と教材名を入力してください。")
+                    elif len(edit_study_days) == 0:
+                        st.error("少なくとも1つ曜日を選んでください。")
+                    else:
+                        ok = update_material_row(
+                            sheets["materials"],
+                            materials_df,
+                            selected_material_edit_id,
+                            {
+                                "subject": edit_subject,
+                                "material_name": edit_material_name,
+                                "total_questions": int(edit_total_questions),
+                                "target_date": str(edit_target_date),
+                                "study_days": ",".join(edit_study_days)
+                            }
+                        )
+
+                        if ok:
+                            st.success("教材情報を更新しました。")
+                            time.sleep(1.0)
+                            st.rerun()
+                        else:
+                            st.error("更新対象の教材が見つかりませんでした。")
+
+        st.caption("※総問題数を増やしても、追加分の問題番号はまだ自動生成されません。必要なら次に追加できます。")
+
+
+# =====================
+# 問題
+# =====================
 
 with tab_questions:
     st.subheader("📝 問題を育てる")
@@ -903,6 +1071,10 @@ with tab_questions:
                 st.write(f"第{int(q['question_number'])}問　{status}　{issue}")
 
 
+# =====================
+# 記録
+# =====================
+
 with tab_record:
     st.subheader("🌙 学習記録")
 
@@ -986,8 +1158,8 @@ with tab_record:
                 show_result_effect(result)
 
     st.divider()
-
     logs_df = load_sheet(sheets["logs"])
+
     st.markdown("### 最近の記録")
 
     if logs_df.empty:
@@ -1017,6 +1189,10 @@ with tab_record:
                 if safe_str(log.get("comment", "")):
                     st.write(log.get("comment", ""))
 
+
+# =====================
+# 進捗
+# =====================
 
 with tab_progress:
     st.subheader("📊 進捗")
@@ -1070,6 +1246,10 @@ with tab_progress:
                                 f"第{q['question_number']}問　{safe_str(q.get('issue', ''))}"
                             )
 
+
+# =====================
+# 開発者用
+# =====================
 
 with st.expander("開発者用：データ確認"):
     st.markdown("### materials")
