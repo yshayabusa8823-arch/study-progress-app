@@ -553,10 +553,10 @@ with tab_today:
                         priority = 1 if manual_task_type in ["復習", "やり直し"] else 3
 
                         sheets["daily_tasks"].append_row([
-                            today_str,
-                            qid,
-                            manual_task_type,
-                            priority,
+                            str(today_str),
+                            str(qid),
+                            str(manual_task_type),
+                            str(priority),
                             "未完了"
                         ])
 
