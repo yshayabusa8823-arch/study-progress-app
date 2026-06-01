@@ -2,8 +2,9 @@ import streamlit as st
 import pandas as pd
 import gspread
 from google.oauth2.service_account import Credentials
-from datetime import date, timedelta
+from datetime import date, timedelta, datetime
 import time
+import json
 
 st.set_page_config(
     page_title="Study Progress",
@@ -23,7 +24,29 @@ WEEKDAY_MAP = {
     6: "日",
 }
 
-WEEKDAYS = ["月", "火", "水", "木", "金", "土", "日"]
+WEEKDAYS = ["月", "火", "水", "金", "土", "日"]
+
+
+# =====================
+# Google Sheets 接続
+# =====================
+
+def get_or_create_worksheet(spreadsheet, title, headers):
+    try:
+        ws = spreadsheet.worksheet(title)
+    except gspread.WorksheetNotFound:
+        ws = spreadsheet.add_worksheet(
+            title=title,
+            rows=1000,
+            cols=max(len(headers), 10)
+        )
+        ws.append_row(headers)
+
+    values = ws.get_all_values()
+    if not values:
+        ws.append_row(headers)
+
+    return ws
 
 
 @st.cache_resource
@@ -41,13 +64,34 @@ def connect_sheets():
     client = gspread.authorize(creds)
     spreadsheet = client.open(SHEET_NAME)
 
+    undo_headers = [
+        "action_id",
+        "created_at",
+        "log_id",
+        "question_id",
+        "task_date",
+        "task_type",
+        "prev_question_json",
+        "prev_task_status",
+        "undone"
+    ]
+
     return {
         "materials": spreadsheet.worksheet("materials"),
         "questions": spreadsheet.worksheet("questions"),
         "logs": spreadsheet.worksheet("logs"),
         "daily_tasks": spreadsheet.worksheet("daily_tasks"),
+        "undo_actions": get_or_create_worksheet(
+            spreadsheet,
+            "undo_actions",
+            undo_headers
+        ),
     }
 
+
+# =====================
+# 共通関数
+# =====================
 
 def load_sheet(ws):
     records = ws.get_all_records()
@@ -58,6 +102,13 @@ def safe_str(value):
     if pd.isna(value):
         return ""
     return str(value)
+
+
+def safe_int(value, default=0):
+    try:
+        return int(float(value))
+    except Exception:
+        return default
 
 
 def next_id(df, id_col):
@@ -168,6 +219,239 @@ def update_task_status(ws, tasks_df, task_date, question_id, task_type, new_stat
     return True
 
 
+def update_task_row(ws, tasks_df, task_date, question_id, task_type, new_values):
+    if tasks_df.empty:
+        return False
+
+    target = tasks_df[
+        (tasks_df["task_date"].astype(str) == str(task_date)) &
+        (tasks_df["question_id"].astype(str) == str(question_id)) &
+        (tasks_df["task_type"].astype(str) == str(task_type))
+    ]
+
+    if target.empty:
+        return False
+
+    sheet_row = target.index[0] + 2
+    headers = list(tasks_df.columns)
+    row_values = ws.row_values(sheet_row)
+
+    while len(row_values) < len(headers):
+        row_values.append("")
+
+    for col_name, value in new_values.items():
+        if col_name in headers:
+            row_values[headers.index(col_name)] = value
+
+    end_col = col_letter(len(headers))
+    ws.update(f"A{sheet_row}:{end_col}{sheet_row}", [row_values])
+    return True
+
+
+def delete_task(ws, tasks_df, task_date, question_id, task_type):
+    if tasks_df.empty:
+        return False
+
+    target = tasks_df[
+        (tasks_df["task_date"].astype(str) == str(task_date)) &
+        (tasks_df["question_id"].astype(str) == str(question_id)) &
+        (tasks_df["task_type"].astype(str) == str(task_type))
+    ]
+
+    if target.empty:
+        return False
+
+    sheet_row = target.index[0] + 2
+    ws.delete_rows(sheet_row)
+    return True
+
+
+def find_task_status(tasks_df, task_date, question_id, task_type):
+    if tasks_df.empty:
+        return ""
+
+    target = tasks_df[
+        (tasks_df["task_date"].astype(str) == str(task_date)) &
+        (tasks_df["question_id"].astype(str) == str(question_id)) &
+        (tasks_df["task_type"].astype(str) == str(task_type))
+    ]
+
+    if target.empty:
+        return ""
+
+    row = target.iloc[0]
+    return safe_str(row.get("status", ""))
+
+
+def save_undo_action(
+    sheets,
+    undo_df,
+    log_id,
+    selected_q,
+    tasks_df,
+    question_id,
+    task_type
+):
+    today_str = str(date.today())
+    action_id = next_id(undo_df, "action_id")
+
+    prev_question = {
+        "status": safe_str(selected_q.get("status", "")),
+        "last_done_date": safe_str(selected_q.get("last_done_date", "")),
+        "next_review_date": safe_str(selected_q.get("next_review_date", "")),
+        "difficulty": safe_str(selected_q.get("difficulty", "")),
+        "round": safe_str(selected_q.get("round", "")),
+    }
+
+    prev_task_status = find_task_status(
+        tasks_df,
+        today_str,
+        question_id,
+        task_type
+    )
+
+    sheets["undo_actions"].append_row([
+        int(action_id),
+        datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        int(log_id),
+        int(question_id),
+        today_str,
+        task_type,
+        json.dumps(prev_question, ensure_ascii=False),
+        prev_task_status,
+        ""
+    ])
+
+
+def delete_log_by_id(ws, logs_df, log_id):
+    if logs_df.empty:
+        return False
+
+    target = logs_df[
+        logs_df["log_id"].astype(str) == str(log_id)
+    ]
+
+    if target.empty:
+        return False
+
+    sheet_row = target.index[0] + 2
+    ws.delete_rows(sheet_row)
+    return True
+
+
+def delete_logs_by_question_id(ws, logs_df, question_id):
+    """
+    指定した問題の学習ログを全部削除する。
+    行番号がずれないように下の行から削除する。
+    """
+    if logs_df.empty:
+        return 0
+
+    target = logs_df[
+        logs_df["question_id"].astype(str) == str(question_id)
+    ]
+
+    if target.empty:
+        return 0
+
+    sheet_rows = [idx + 2 for idx in target.index]
+
+    for sheet_row in sorted(sheet_rows, reverse=True):
+        ws.delete_rows(sheet_row)
+
+    return len(sheet_rows)
+
+
+def reset_tasks_for_question(ws, tasks_df, question_id):
+    """
+    指定した問題に紐づくタスクを未完了に戻す。
+    タスク自体は消さない。
+    """
+    if tasks_df.empty or "status" not in tasks_df.columns:
+        return 0
+
+    target = tasks_df[
+        tasks_df["question_id"].astype(str) == str(question_id)
+    ]
+
+    if target.empty:
+        return 0
+
+    headers = list(tasks_df.columns)
+    status_idx = headers.index("status")
+    count = 0
+
+    for idx, _ in target.iterrows():
+        sheet_row = idx + 2
+        row_values = ws.row_values(sheet_row)
+
+        while len(row_values) < len(headers):
+            row_values.append("")
+
+        row_values[status_idx] = "未完了"
+        end_col = col_letter(len(headers))
+        ws.update(f"A{sheet_row}:{end_col}{sheet_row}", [row_values])
+        count += 1
+
+    return count
+
+
+def reset_question_before_learning(sheets, questions_df, logs_df, tasks_df, question_id):
+    """
+    間違えて実施済みにした問題を、実施前の状態に戻す。
+    - 問題状態を未着手にする
+    - last_done_date を空にする
+    - next_review_date を空にする
+    - 学習ログを削除する
+    - 紐づくタスクは未完了に戻す
+    """
+    update_question_row(
+        sheets["questions"],
+        questions_df,
+        question_id,
+        {
+            "status": "未着手",
+            "last_done_date": "",
+            "next_review_date": "",
+            "difficulty": 3,
+            "round": 1
+        }
+    )
+
+    deleted_logs = delete_logs_by_question_id(
+        sheets["logs"],
+        logs_df,
+        question_id
+    )
+
+    reset_tasks = reset_tasks_for_question(
+        sheets["daily_tasks"],
+        tasks_df,
+        question_id
+    )
+
+    return deleted_logs, reset_tasks
+
+
+def mark_undo_done(ws, undo_df, action_id):
+    target = undo_df[
+        undo_df["action_id"].astype(str) == str(action_id)
+    ]
+
+    if target.empty:
+        return False
+
+    sheet_row = target.index[0] + 2
+    headers = list(undo_df.columns)
+
+    if "undone" not in headers:
+        return False
+
+    col = headers.index("undone") + 1
+    ws.update_cell(sheet_row, col, "済")
+    return True
+
+
 def count_study_days_until(target_date, study_days, start_date=None):
     if start_date is None:
         start_date = date.today()
@@ -199,6 +483,10 @@ def task_exists(tasks_df, task_date, question_id, task_type=None):
 
     return not matched.empty
 
+
+# =====================
+# タスク生成
+# =====================
 
 def generate_today_tasks(materials_df, questions_df, tasks_df, sheets):
     today = date.today()
@@ -443,6 +731,10 @@ def build_tomorrow_preview_df(materials_df, questions_df):
     return df
 
 
+# =====================
+# 学習記録保存
+# =====================
+
 def save_learning_log(
     sheets,
     logs_df,
@@ -458,6 +750,27 @@ def save_learning_log(
     log_id = next_id(logs_df, "log_id")
     today_str = str(date.today())
 
+    selected_q = questions_df[
+        questions_df["question_id"].astype(str) == str(question_id)
+    ]
+
+    if selected_q.empty:
+        return
+
+    selected_q = selected_q.iloc[0]
+
+    undo_df = load_sheet(sheets["undo_actions"])
+
+    save_undo_action(
+        sheets=sheets,
+        undo_df=undo_df,
+        log_id=log_id,
+        selected_q=selected_q,
+        tasks_df=tasks_df,
+        question_id=question_id,
+        task_type=task_type
+    )
+
     sheets["logs"].append_row([
         int(log_id),
         today_str,
@@ -468,20 +781,8 @@ def save_learning_log(
         comment
     ])
 
-    selected_q = questions_df[
-        questions_df["question_id"].astype(str) == str(question_id)
-    ]
-
-    if selected_q.empty:
-        return
-
-    selected_q = selected_q.iloc[0]
     current_round = selected_q.get("round", 1)
     current_round = int(current_round) if str(current_round).isdigit() else 1
-
-    # =====================
-    # 問題ステータスの決定
-    # =====================
 
     if result == "未完了":
         new_status = "未着手"
@@ -489,25 +790,21 @@ def save_learning_log(
         new_round = current_round
 
     elif task_type in ["復習", "苦手復習", "やり直し"] and result == "できた":
-        # 復習系で「できた」なら卒業扱い
         new_status = "完了"
         next_review = ""
         new_round = current_round + 1
 
     elif result == "できた":
-        # 新規で「できた」なら翌日に1回復習
         new_status = "復習待ち"
         next_review = date.today() + timedelta(days=1)
         new_round = current_round + 1
 
     elif result == "微妙":
-        # 微妙なら明日もう一回
         new_status = "復習待ち"
         next_review = date.today() + timedelta(days=1)
         new_round = current_round + 1
 
     elif result == "できなかった":
-        # できなかったら苦手として明日復習
         new_status = "苦手"
         next_review = date.today() + timedelta(days=1)
         new_round = current_round + 1
@@ -539,22 +836,6 @@ def save_learning_log(
         "完了" if result != "未完了" else "未完了"
     )
 
-    def delete_task(ws, tasks_df, task_date, question_id, task_type):
-        if tasks_df.empty:
-            return False
-
-        target = tasks_df[
-            (tasks_df["task_date"].astype(str) == str(task_date)) &
-            (tasks_df["question_id"].astype(str) == str(question_id)) &
-            (tasks_df["task_type"].astype(str) == str(task_type))
-        ]
-
-        if target.empty:
-            return False
-
-        sheet_row = target.index[0] + 2
-        ws.delete_rows(sheet_row)
-        return True
 
 def show_result_effect(result):
     if result == "できた":
@@ -581,6 +862,7 @@ materials_df = load_sheet(sheets["materials"])
 questions_df = load_sheet(sheets["questions"])
 logs_df = load_sheet(sheets["logs"])
 tasks_df = load_sheet(sheets["daily_tasks"])
+undo_df = load_sheet(sheets["undo_actions"])
 
 
 # =====================
@@ -716,6 +998,87 @@ with tab_today:
 
     with col_info:
         st.caption("復習・苦手問題・新規問題を自動で今日のタスクに入れます。")
+
+    st.divider()
+    st.markdown("### ↩️ 直前の記録を取り消す")
+
+    undo_df_now = load_sheet(sheets["undo_actions"])
+    logs_df_now = load_sheet(sheets["logs"])
+    tasks_df_now = load_sheet(sheets["daily_tasks"])
+    questions_df_now = load_sheet(sheets["questions"])
+
+    if undo_df_now.empty:
+        st.info("取り消せる操作はありません。")
+    else:
+        available_undo = undo_df_now[
+            undo_df_now["undone"].astype(str) != "済"
+        ].copy()
+
+        if available_undo.empty:
+            st.info("取り消せる操作はありません。")
+        else:
+            latest = available_undo.tail(1).iloc[0]
+
+            target_q = questions_df_now[
+                questions_df_now["question_id"].astype(str) == str(latest["question_id"])
+            ]
+
+            if not target_q.empty:
+                target_q = target_q.iloc[0]
+                material_label = get_material_name(materials_df, target_q["material_id"])
+                question_label = f'{material_label} 第{target_q["question_number"]}問'
+            else:
+                question_label = f'問題ID {latest["question_id"]}'
+
+            st.warning(
+                f"直前の操作：{question_label} / {latest['task_type']} / {latest['created_at']}"
+            )
+
+            if st.button("この直前操作を取り消す", use_container_width=True):
+                try:
+                    prev_question = json.loads(latest["prev_question_json"])
+
+                    update_question_row(
+                        sheets["questions"],
+                        questions_df_now,
+                        latest["question_id"],
+                        {
+                            "status": prev_question.get("status", ""),
+                            "last_done_date": prev_question.get("last_done_date", ""),
+                            "next_review_date": prev_question.get("next_review_date", ""),
+                            "difficulty": prev_question.get("difficulty", ""),
+                            "round": prev_question.get("round", "")
+                        }
+                    )
+
+                    if safe_str(latest.get("prev_task_status", "")):
+                        update_task_status(
+                            sheets["daily_tasks"],
+                            tasks_df_now,
+                            latest["task_date"],
+                            latest["question_id"],
+                            latest["task_type"],
+                            latest["prev_task_status"]
+                        )
+
+                    delete_log_by_id(
+                        sheets["logs"],
+                        logs_df_now,
+                        latest["log_id"]
+                    )
+
+                    mark_undo_done(
+                        sheets["undo_actions"],
+                        undo_df_now,
+                        latest["action_id"]
+                    )
+
+                    st.success("一つ前の状態に戻しました。")
+                    time.sleep(1.0)
+                    st.rerun()
+
+                except Exception as e:
+                    st.error(f"取り消しに失敗しました：{e}")
 
     st.divider()
     st.markdown("### 好きな問題を今日に追加")
@@ -894,6 +1257,59 @@ with tab_today:
                         if user_note:
                             st.write(f"**メモ：** {user_note}")
 
+                        with st.expander("このタスクを編集する"):
+                            task_type_options = ["新規", "復習", "苦手復習", "やり直し"]
+                            status_options_task = ["未完了", "完了"]
+
+                            edited_task_type = st.selectbox(
+                                "タスク種別",
+                                task_type_options,
+                                index=task_type_options.index(task_type)
+                                if task_type in task_type_options else 0,
+                                key=f"edit_task_type_{question_id}_{task_type}"
+                            )
+
+                            edited_priority = st.number_input(
+                                "優先度",
+                                min_value=1,
+                                max_value=99,
+                                value=safe_int(row.get("priority", 3), 3),
+                                key=f"edit_priority_{question_id}_{task_type}"
+                            )
+
+                            edited_task_status = st.selectbox(
+                                "タスク状態",
+                                status_options_task,
+                                index=status_options_task.index(task_status)
+                                if task_status in status_options_task else 0,
+                                key=f"edit_task_status_{question_id}_{task_type}"
+                            )
+
+                            if st.button(
+                                "タスク情報を保存",
+                                key=f"save_task_edit_{question_id}_{task_type}",
+                                use_container_width=True
+                            ):
+                                ok = update_task_row(
+                                    sheets["daily_tasks"],
+                                    tasks_df,
+                                    str(date.today()),
+                                    question_id,
+                                    task_type,
+                                    {
+                                        "task_type": edited_task_type,
+                                        "priority": int(edited_priority),
+                                        "status": edited_task_status
+                                    }
+                                )
+
+                                if ok:
+                                    st.success("タスク情報を更新しました。")
+                                    time.sleep(1.0)
+                                    st.rerun()
+                                else:
+                                    st.error("更新対象が見つかりませんでした。")
+
                         with st.expander("この問題を記録する"):
                             result = st.selectbox(
                                 "結果",
@@ -960,7 +1376,7 @@ with tab_today:
                                     time.sleep(1.0)
                                     st.rerun()
                                 else:
-                                    st.error("削除対象が見つかりませんでした。")    
+                                    st.error("削除対象が見つかりませんでした。")
 
     st.divider()
     st.markdown("## 🌙 明日の予定プレビュー")
@@ -1307,27 +1723,55 @@ with tab_questions:
                 )
 
                 if submitted:
-                    ok = update_question_row(
-                        sheets["questions"],
-                        questions_df,
-                        selected_question_id,
-                        {
-                            "status": status,
-                            "round": int(round_num),
-                            "issue": issue,
-                            "tags": tags,
-                            "user_note": user_note,
-                            "difficulty": int(difficulty),
-                            "next_review_date": str(next_review_date)
-                        }
-                    )
+                    if status == "未着手":
+                        deleted_logs, reset_tasks = reset_question_before_learning(
+                            sheets=sheets,
+                            questions_df=questions_df,
+                            logs_df=logs_df,
+                            tasks_df=tasks_df,
+                            question_id=selected_question_id
+                        )
 
-                    if ok:
-                        st.success("問題情報を更新しました。")
-                        time.sleep(1.0)
+                        # 論点・タグ・メモは消さずに保存する
+                        update_question_row(
+                            sheets["questions"],
+                            questions_df,
+                            selected_question_id,
+                            {
+                                "issue": issue,
+                                "tags": tags,
+                                "user_note": user_note,
+                            }
+                        )
+
+                        st.success(
+                            f"未着手に戻しました。学習ログ {deleted_logs} 件を削除し、タスク {reset_tasks} 件を未完了に戻しました。"
+                        )
+                        time.sleep(1.2)
                         st.rerun()
+
                     else:
-                        st.error("更新対象の問題が見つかりませんでした。")
+                        ok = update_question_row(
+                            sheets["questions"],
+                            questions_df,
+                            selected_question_id,
+                            {
+                                "status": status,
+                                "round": int(round_num),
+                                "issue": issue,
+                                "tags": tags,
+                                "user_note": user_note,
+                                "difficulty": int(difficulty),
+                                "next_review_date": str(next_review_date)
+                            }
+                        )
+
+                        if ok:
+                            st.success("問題情報を更新しました。")
+                            time.sleep(1.0)
+                            st.rerun()
+                        else:
+                            st.error("更新対象の問題が見つかりませんでした。")
 
         with st.expander("この教材の問題一覧を見る"):
             for _, q in filtered_questions.head(200).iterrows():
@@ -1551,3 +1995,6 @@ with st.expander("開発者用：データ確認"):
 
     st.markdown("### daily_tasks")
     st.dataframe(tasks_df, use_container_width=True)
+
+    st.markdown("### undo_actions")
+    st.dataframe(undo_df, use_container_width=True)
