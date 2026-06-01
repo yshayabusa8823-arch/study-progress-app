@@ -872,70 +872,138 @@ undo_df = load_sheet(sheets["undo_actions"])
 st.markdown(
     """
     <style>
+    .stApp {
+        background:
+            radial-gradient(circle at top left, #ffe4ec 0, transparent 32%),
+            radial-gradient(circle at top right, #e0f2fe 0, transparent 28%),
+            linear-gradient(180deg, #fff7ed 0%, #fffafa 45%, #f8fafc 100%);
+    }
+
     .block-container {
-        padding-top: 1.2rem;
+        padding-top: 1.4rem;
         padding-bottom: 3rem;
-        max-width: 780px;
+        max-width: 820px;
     }
 
     h1 {
-        font-size: 2.1rem !important;
+        font-size: 2.25rem !important;
         line-height: 1.15 !important;
-        margin-bottom: 0.2rem !important;
+        margin-bottom: 0.25rem !important;
+        color: #7c2d12 !important;
     }
 
-    h2 {
-        font-size: 1.45rem !important;
-        margin-top: 1rem !important;
-    }
-
-    h3 {
-        font-size: 1.15rem !important;
+    h2, h3 {
+        color: #7c2d12 !important;
     }
 
     .stTabs [data-baseweb="tab-list"] {
-        gap: 0.2rem;
+        gap: 0.35rem;
         overflow-x: auto;
         white-space: nowrap;
+        background: rgba(255,255,255,0.65);
+        padding: 0.35rem;
+        border-radius: 999px;
+        border: 1px solid rgba(251, 207, 232, 0.8);
     }
 
     .stTabs [data-baseweb="tab"] {
         font-size: 0.95rem;
-        padding-left: 0.65rem;
-        padding-right: 0.65rem;
+        padding: 0.45rem 0.85rem;
+        border-radius: 999px;
+        color: #7c2d12;
+    }
+
+    .stTabs [aria-selected="true"] {
+        background: linear-gradient(135deg, #fb7185, #f97316);
+        color: white !important;
+        font-weight: 700;
+        box-shadow: 0 6px 16px rgba(251, 113, 133, 0.25);
     }
 
     div[data-testid="stMetric"] {
-        background: #fafafa;
-        border: 1px solid #eeeeee;
-        padding: 0.75rem;
-        border-radius: 14px;
+        background: rgba(255, 255, 255, 0.86);
+        border: 1px solid #fed7aa;
+        padding: 0.85rem;
+        border-radius: 18px;
+        box-shadow: 0 8px 22px rgba(251, 146, 60, 0.10);
+    }
+
+    div[data-testid="stVerticalBlockBorderWrapper"] {
+        background: rgba(255, 255, 255, 0.86);
+        border-radius: 22px;
+        border: 1px solid rgba(254, 202, 202, 0.9);
+        box-shadow: 0 10px 24px rgba(244, 114, 182, 0.10);
+    }
+
+    button[kind="primary"] {
+        background: linear-gradient(135deg, #fb7185, #f97316) !important;
+        border: none !important;
+        border-radius: 999px !important;
+        color: white !important;
+        font-weight: 700 !important;
+        box-shadow: 0 8px 18px rgba(251, 113, 133, 0.25);
+    }
+
+    .stButton > button {
+        border-radius: 999px;
+        border: 1px solid #fecaca;
+        background: #ffffffcc;
+        color: #7c2d12;
+        font-weight: 650;
+    }
+
+    .stButton > button:hover {
+        border-color: #fb7185;
+        color: #be123c;
+        box-shadow: 0 8px 18px rgba(251, 113, 133, 0.16);
+        transform: translateY(-1px);
     }
 
     .card-title {
-        font-size: 1.22rem;
-        font-weight: 700;
-        margin-bottom: 0.35rem;
+        font-size: 1.24rem;
+        font-weight: 800;
+        margin-bottom: 0.45rem;
+        color: #7c2d12;
     }
 
     .pill {
         display: inline-block;
-        padding: 0.18rem 0.55rem;
+        padding: 0.22rem 0.62rem;
         border-radius: 999px;
-        background: #f2f2f2;
+        background: #fff1f2;
+        border: 1px solid #fecdd3;
+        color: #9f1239;
         margin-right: 0.25rem;
         margin-bottom: 0.25rem;
         font-size: 0.85rem;
+        font-weight: 650;
     }
 
     .group-title {
         font-size: 1.05rem;
-        font-weight: 700;
+        font-weight: 800;
         margin-top: 1.2rem;
-        margin-bottom: 0.5rem;
-        padding: 0.45rem 0.7rem;
-        background: #f7f7f7;
-        border-radius: 12px;
+        margin-bottom: 0.55rem;
+        padding: 0.55rem 0.8rem;
+        background: linear-gradient(135deg, #fff1f2, #ffedd5);
+        color: #9a3412;
+        border: 1px solid #fed7aa;
+        border-radius: 16px;
+        box-shadow: 0 6px 16px rgba(251, 146, 60, 0.10);
+    }
+
+    .stAlert {
+        border-radius: 18px;
+    }
+
+    div[data-testid="stExpander"] {
+        border-radius: 16px;
+        border: 1px solid #fde68a;
+        background: rgba(255, 251, 235, 0.65);
+    }
+
+    input, textarea {
+        border-radius: 12px !important;
     }
     </style>
     """,
