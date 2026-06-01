@@ -54,18 +54,17 @@ def load_sheet(ws):
     return pd.DataFrame(records)
 
 
-def next_id(df, id_col):
-    if df.empty or id_col not in df.columns:
-        return 1
-
-    ids = pd.to_numeric(df[id_col], errors="coerce").fillna(0)
-    return int(ids.max()) + 1
-
-
 def safe_str(value):
     if pd.isna(value):
         return ""
     return str(value)
+
+
+def next_id(df, id_col):
+    if df.empty or id_col not in df.columns:
+        return 1
+    ids = pd.to_numeric(df[id_col], errors="coerce").fillna(0)
+    return int(ids.max()) + 1
 
 
 def col_letter(n):
@@ -99,9 +98,7 @@ def update_question_row(ws, questions_df, question_id, new_values):
     if target.empty:
         return False
 
-    df_index = target.index[0]
-    sheet_row = df_index + 2
-
+    sheet_row = target.index[0] + 2
     headers = list(questions_df.columns)
     row_values = ws.row_values(sheet_row)
 
@@ -109,19 +106,11 @@ def update_question_row(ws, questions_df, question_id, new_values):
         row_values.append("")
 
     for col_name, value in new_values.items():
-        if col_name not in headers:
-            continue
-
-        col_index = headers.index(col_name)
-        row_values[col_index] = value
+        if col_name in headers:
+            row_values[headers.index(col_name)] = value
 
     end_col = col_letter(len(headers))
-
-    ws.update(
-        f"A{sheet_row}:{end_col}{sheet_row}",
-        [row_values]
-    )
-
+    ws.update(f"A{sheet_row}:{end_col}{sheet_row}", [row_values])
     return True
 
 
@@ -133,9 +122,7 @@ def update_material_row(ws, materials_df, material_id, new_values):
     if target.empty:
         return False
 
-    df_index = target.index[0]
-    sheet_row = df_index + 2
-
+    sheet_row = target.index[0] + 2
     headers = list(materials_df.columns)
     row_values = ws.row_values(sheet_row)
 
@@ -143,19 +130,11 @@ def update_material_row(ws, materials_df, material_id, new_values):
         row_values.append("")
 
     for col_name, value in new_values.items():
-        if col_name not in headers:
-            continue
-
-        col_index = headers.index(col_name)
-        row_values[col_index] = value
+        if col_name in headers:
+            row_values[headers.index(col_name)] = value
 
     end_col = col_letter(len(headers))
-
-    ws.update(
-        f"A{sheet_row}:{end_col}{sheet_row}",
-        [row_values]
-    )
-
+    ws.update(f"A{sheet_row}:{end_col}{sheet_row}", [row_values])
     return True
 
 
@@ -172,9 +151,7 @@ def update_task_status(ws, tasks_df, task_date, question_id, task_type, new_stat
     if target.empty:
         return False
 
-    df_index = target.index[0]
-    sheet_row = df_index + 2
-
+    sheet_row = target.index[0] + 2
     headers = list(tasks_df.columns)
     row_values = ws.row_values(sheet_row)
 
@@ -184,23 +161,19 @@ def update_task_status(ws, tasks_df, task_date, question_id, task_type, new_stat
     if "status" not in headers:
         return False
 
-    status_index = headers.index("status")
-    row_values[status_index] = new_status
-
+    row_values[headers.index("status")] = new_status
     end_col = col_letter(len(headers))
 
-    ws.update(
-        f"A{sheet_row}:{end_col}{sheet_row}",
-        [row_values]
-    )
-
+    ws.update(f"A{sheet_row}:{end_col}{sheet_row}", [row_values])
     return True
 
 
-def count_study_days_until(target_date, study_days):
-    today = date.today()
+def count_study_days_until(target_date, study_days, start_date=None):
+    if start_date is None:
+        start_date = date.today()
+
     count = 0
-    d = today
+    d = start_date
 
     while d <= target_date:
         if WEEKDAY_MAP[d.weekday()] in study_days:
@@ -237,7 +210,7 @@ def generate_today_tasks(materials_df, questions_df, tasks_df, sheets):
 
     for _, material in materials_df.iterrows():
         material_id = material["material_id"]
-        study_days = safe_str(material["study_days"]).split(",")
+        study_days = safe_str(material.get("study_days", "")).split(",")
 
         if WEEKDAY_MAP[today.weekday()] not in study_days:
             continue
@@ -255,14 +228,13 @@ def generate_today_tasks(materials_df, questions_df, tasks_df, sheets):
         )
         qs = qs.sort_values("question_number")
 
-        # 苦手は「苦手復習」だけにする。復習との重複を防ぐ。
         review_qs = qs[
             (qs["next_review_date"].astype(str) == today_str) &
             (qs["status"].astype(str) != "苦手")
         ]
 
         for _, q in review_qs.iterrows():
-            if not task_exists(tasks_df, today_str, q["question_id"], "復習"):
+            if not task_exists(tasks_df, today_str, q["question_id"]):
                 new_rows.append([
                     today_str,
                     int(q["question_id"]),
@@ -298,7 +270,7 @@ def generate_today_tasks(materials_df, questions_df, tasks_df, sheets):
             target = today
 
         remaining_questions = len(unstarted_qs)
-        remaining_days = count_study_days_until(target, study_days)
+        remaining_days = count_study_days_until(target, study_days, today)
         new_count = max(1, -(-remaining_questions // remaining_days))
 
         new_qs = unstarted_qs.head(new_count)
@@ -319,25 +291,25 @@ def generate_today_tasks(materials_df, questions_df, tasks_df, sheets):
     return len(new_rows)
 
 
-def build_today_tasks_df(tasks_df, questions_df, materials_df, hide_done=False):
-    today_str = str(date.today())
+def build_tasks_df_for_date(tasks_df, questions_df, materials_df, target_date, hide_done=False):
+    target_str = str(target_date)
 
     if tasks_df.empty:
         return pd.DataFrame()
 
-    today_tasks = tasks_df[
-        tasks_df["task_date"].astype(str) == today_str
+    target_tasks = tasks_df[
+        tasks_df["task_date"].astype(str) == target_str
     ].copy()
 
-    if hide_done and "status" in today_tasks.columns:
-        today_tasks = today_tasks[
-            today_tasks["status"].astype(str) != "完了"
+    if hide_done and "status" in target_tasks.columns:
+        target_tasks = target_tasks[
+            target_tasks["status"].astype(str) != "完了"
         ]
 
-    if today_tasks.empty:
+    if target_tasks.empty:
         return pd.DataFrame()
 
-    merged = today_tasks.merge(
+    merged = target_tasks.merge(
         questions_df,
         on="question_id",
         how="left",
@@ -363,6 +335,112 @@ def build_today_tasks_df(tasks_df, questions_df, materials_df, hide_done=False):
     )
 
     return merged
+
+
+def build_today_tasks_df(tasks_df, questions_df, materials_df, hide_done=False):
+    return build_tasks_df_for_date(
+        tasks_df,
+        questions_df,
+        materials_df,
+        date.today(),
+        hide_done=hide_done
+    )
+
+
+def build_tomorrow_preview_df(materials_df, questions_df):
+    tomorrow = date.today() + timedelta(days=1)
+    tomorrow_str = str(tomorrow)
+    tomorrow_weekday = WEEKDAY_MAP[tomorrow.weekday()]
+    preview_rows = []
+
+    if materials_df.empty or questions_df.empty:
+        return pd.DataFrame()
+
+    for _, material in materials_df.iterrows():
+        material_id = material["material_id"]
+        study_days = safe_str(material.get("study_days", "")).split(",")
+
+        qs = questions_df[
+            questions_df["material_id"].astype(str) == str(material_id)
+        ].copy()
+
+        if qs.empty:
+            continue
+
+        qs["question_number"] = pd.to_numeric(
+            qs["question_number"],
+            errors="coerce"
+        )
+        qs = qs.sort_values("question_number")
+
+        review_qs = qs[
+            (qs["next_review_date"].astype(str) == tomorrow_str) &
+            (qs["status"].astype(str) != "苦手")
+        ]
+
+        for _, q in review_qs.iterrows():
+            row = q.to_dict()
+            row["task_type"] = "復習予定"
+            row["教材"] = get_material_name(materials_df, q["material_id"])
+            row["priority"] = 1
+            preview_rows.append(row)
+
+        weak_qs = qs[
+            (qs["status"].astype(str) == "苦手") &
+            (qs["next_review_date"].astype(str) == tomorrow_str)
+        ]
+
+        for _, q in weak_qs.iterrows():
+            row = q.to_dict()
+            row["task_type"] = "苦手復習予定"
+            row["教材"] = get_material_name(materials_df, q["material_id"])
+            row["priority"] = 2
+            preview_rows.append(row)
+
+        if tomorrow_weekday in study_days:
+            unstarted_qs = qs[
+                qs["status"].astype(str).isin(["未着手", "学習中"])
+            ]
+
+            if not unstarted_qs.empty:
+                target_dt = pd.to_datetime(
+                    material.get("target_date", ""),
+                    errors="coerce"
+                )
+
+                if pd.isna(target_dt):
+                    target = tomorrow
+                else:
+                    target = target_dt.date()
+
+                remaining_questions = len(unstarted_qs)
+                remaining_days = count_study_days_until(
+                    target,
+                    study_days,
+                    start_date=tomorrow
+                )
+
+                new_count = max(1, -(-remaining_questions // remaining_days))
+                new_qs = unstarted_qs.head(new_count)
+
+                for _, q in new_qs.iterrows():
+                    row = q.to_dict()
+                    row["task_type"] = "新規予定"
+                    row["教材"] = get_material_name(materials_df, q["material_id"])
+                    row["priority"] = 3
+                    preview_rows.append(row)
+
+    if not preview_rows:
+        return pd.DataFrame()
+
+    df = pd.DataFrame(preview_rows)
+    df["question_number"] = pd.to_numeric(
+        df["question_number"],
+        errors="coerce"
+    )
+    df = df.sort_values(["priority", "教材", "question_number"])
+
+    return df
 
 
 def save_learning_log(
@@ -401,17 +479,43 @@ def save_learning_log(
     current_round = selected_q.get("round", 1)
     current_round = int(current_round) if str(current_round).isdigit() else 1
 
-    # やった日の翌日を次回復習日にする
-    next_review = date.today() + timedelta(days=1)
+    # =====================
+    # 問題ステータスの決定
+    # =====================
 
-    if result == "できた":
+    if result == "未完了":
+        new_status = "未着手"
+        next_review = selected_q.get("next_review_date", "")
+        new_round = current_round
+
+    elif task_type in ["復習", "苦手復習", "やり直し"] and result == "できた":
+        # 復習系で「できた」なら卒業扱い
+        new_status = "完了"
+        next_review = ""
+        new_round = current_round + 1
+
+    elif result == "できた":
+        # 新規で「できた」なら翌日に1回復習
         new_status = "復習待ち"
+        next_review = date.today() + timedelta(days=1)
+        new_round = current_round + 1
+
     elif result == "微妙":
+        # 微妙なら明日もう一回
         new_status = "復習待ち"
+        next_review = date.today() + timedelta(days=1)
+        new_round = current_round + 1
+
     elif result == "できなかった":
+        # できなかったら苦手として明日復習
         new_status = "苦手"
+        next_review = date.today() + timedelta(days=1)
+        new_round = current_round + 1
+
     else:
         new_status = "未着手"
+        next_review = date.today() + timedelta(days=1)
+        new_round = current_round
 
     update_question_row(
         sheets["questions"],
@@ -420,9 +524,9 @@ def save_learning_log(
         {
             "status": new_status,
             "last_done_date": today_str,
-            "next_review_date": str(next_review),
+            "next_review_date": str(next_review) if next_review else "",
             "difficulty": int(difficulty),
-            "round": current_round + 1 if result != "未完了" else current_round
+            "round": new_round
         }
     )
 
@@ -435,6 +539,22 @@ def save_learning_log(
         "完了" if result != "未完了" else "未完了"
     )
 
+    def delete_task(ws, tasks_df, task_date, question_id, task_type):
+        if tasks_df.empty:
+            return False
+
+        target = tasks_df[
+            (tasks_df["task_date"].astype(str) == str(task_date)) &
+            (tasks_df["question_id"].astype(str) == str(question_id)) &
+            (tasks_df["task_type"].astype(str) == str(task_type))
+        ]
+
+        if target.empty:
+            return False
+
+        sheet_row = target.index[0] + 2
+        ws.delete_rows(sheet_row)
+        return True
 
 def show_result_effect(result):
     if result == "できた":
@@ -508,10 +628,6 @@ st.markdown(
         border: 1px solid #eeeeee;
         padding: 0.75rem;
         border-radius: 14px;
-    }
-
-    div[data-testid="stVerticalBlockBorderWrapper"] {
-        border-radius: 16px;
     }
 
     .card-title {
@@ -635,7 +751,6 @@ with tab_today:
             if target_questions.empty:
                 st.warning("この教材には問題がありません。")
                 manual_question_number = 1
-                max_q = 1
             else:
                 max_q = int(target_questions["question_number"].max())
 
@@ -827,6 +942,74 @@ with tab_today:
 
                                 show_result_effect(result)
 
+                            if st.button(
+                                "このタスクを削除",
+                                key=f"today_delete_{question_id}_{task_type}",
+                                use_container_width=True
+                            ):
+                                ok = delete_task(
+                                    sheets["daily_tasks"],
+                                    tasks_df,
+                                    str(date.today()),
+                                    question_id,
+                                    task_type
+                                )
+
+                                if ok:
+                                    st.warning("タスクを削除しました。")
+                                    time.sleep(1.0)
+                                    st.rerun()
+                                else:
+                                    st.error("削除対象が見つかりませんでした。")    
+
+    st.divider()
+    st.markdown("## 🌙 明日の予定プレビュー")
+    st.caption("今日の記録・教材の曜日設定・未着手問題から、明日やる予定を先読みします。")
+
+    tomorrow_preview_df = build_tomorrow_preview_df(materials_df, questions_df)
+
+    if tomorrow_preview_df.empty:
+        st.info("明日の予定はまだありません。")
+    else:
+        task_type_order = ["復習予定", "苦手復習予定", "新規予定"]
+
+        for group_type in task_type_order:
+            group_df = tomorrow_preview_df[
+                tomorrow_preview_df["task_type"].astype(str) == group_type
+            ]
+
+            if group_df.empty:
+                continue
+
+            st.markdown(
+                f'<div class="group-title">📌 {group_type}</div>',
+                unsafe_allow_html=True
+            )
+
+            for _, row in group_df.iterrows():
+                material_label = safe_str(row.get("教材", ""))
+                qnum = int(row["question_number"]) if not pd.isna(row["question_number"]) else ""
+
+                with st.container(border=True):
+                    st.markdown(
+                        f"""
+                        <div class="card-title">{material_label}<br>第{qnum}問</div>
+                        <span class="pill">種類：{group_type}</span>
+                        """,
+                        unsafe_allow_html=True
+                    )
+
+                    issue = safe_str(row.get("issue", ""))
+                    tags = safe_str(row.get("tags", ""))
+                    user_note = safe_str(row.get("user_note", ""))
+
+                    if issue:
+                        st.write(f"**論点：** {issue}")
+                    if tags:
+                        st.write(f"**タグ：** {tags}")
+                    if user_note:
+                        st.write(f"**メモ：** {user_note}")
+
 
 # =====================
 # 教材
@@ -947,12 +1130,15 @@ with tab_material:
                     if str(selected_material["total_questions"]).isdigit() else 1
                 )
 
-                try:
-                    current_target_date = pd.to_datetime(
-                        selected_material["target_date"]
-                    ).date()
-                except Exception:
+                current_target_dt = pd.to_datetime(
+                    selected_material.get("target_date", ""),
+                    errors="coerce"
+                )
+
+                if pd.isna(current_target_dt):
                     current_target_date = date.today()
+                else:
+                    current_target_date = current_target_dt.date()
 
                 edit_target_date = st.date_input(
                     "目標完了日",
