@@ -489,6 +489,49 @@ def task_exists(tasks_df, task_date, question_id, task_type=None):
 
     return not matched.empty
 
+def estimate_finish_plan(total, touched, study_days, target_date_raw):
+    remaining = max(total - touched, 0)
+
+    if remaining == 0:
+        return {
+            "remaining": 0,
+            "study_days_left": 0,
+            "per_day": 0,
+            "finish_date": "一周完了！"
+        }
+
+    today = date.today()
+
+    try:
+        target_date = pd.to_datetime(target_date_raw).date()
+    except Exception:
+        target_date = today
+
+    study_days_left = count_study_days_until(
+        target_date,
+        study_days,
+        start_date=today
+    )
+
+    per_day = max(1, -(-remaining // study_days_left))
+
+    d = today
+    left = remaining
+
+    while left > 0:
+        if WEEKDAY_MAP[d.weekday()] in study_days:
+            left -= per_day
+        d += timedelta(days=1)
+
+    finish_date = d - timedelta(days=1)
+
+    return {
+        "remaining": remaining,
+        "study_days_left": study_days_left,
+        "per_day": per_day,
+        "finish_date": f"{finish_date.month}月{finish_date.day}日"
+    }
+
 
 # =====================
 # タスク生成
@@ -2303,6 +2346,30 @@ with tab_progress:
 
                 st.progress(progress)
                 st.caption(f"着手率：{round(progress * 100, 1)}%")
+
+                study_days = safe_str(material.get("study_days", "")).split(",")
+                study_days = [d for d in study_days if d in WEEKDAYS]
+
+                plan = estimate_finish_plan(
+                    total=total,
+                    touched=touched,
+                    study_days=study_days,
+                    target_date_raw=material.get("target_date", "")
+                )
+
+                st.markdown(
+                    f"""
+                    <div class="sub-card">
+                        <div class="sub-card-title">🗓 一周予定</div>
+                        <div class="sub-card-text">
+                            残り {plan["remaining"]} 問。<br>
+                            このペースなら、1回の学習日に約 {plan["per_day"]} 問ずつ進めると、<br>
+                            <b>{plan["finish_date"]}</b> に一周予定！
+                        </div>
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                )
 
                 weak_qs = qs[qs["status"].astype(str) == "苦手"]
 
