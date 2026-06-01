@@ -1347,6 +1347,9 @@ with tab_today:
     if undo_df_now.empty:
         st.info("取り消せる操作はありません。")
     else:
+        if "undone" not in undo_df_now.columns:
+            undo_df_now["undone"] = ""
+
         available_undo = undo_df_now[
             undo_df_now["undone"].astype(str) != "済"
         ].copy()
