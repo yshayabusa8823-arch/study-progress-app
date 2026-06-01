@@ -3,6 +3,7 @@ import pandas as pd
 import gspread
 from google.oauth2.service_account import Credentials
 from datetime import date, timedelta, datetime
+from zoneinfo import ZoneInfo
 import time
 import json
 
@@ -119,7 +120,7 @@ def load_all_data_live(sheets):
 
 
 def ensure_date_fresh():
-    today_key = str(date.today())
+    today_key = str(today_jst())
 
     if "app_today_key" not in st.session_state:
         st.session_state["app_today_key"] = today_key
@@ -144,6 +145,8 @@ def safe_str(value):
         return ""
     return str(value)
 
+def today_jst():
+    return datetime.now(ZoneInfo("Asia/Tokyo")).date()
 
 def safe_int(value, default=0):
     try:
@@ -326,7 +329,7 @@ def save_undo_action(
     question_id,
     task_type
 ):
-    today_str = str(date.today())
+    today_str = str(today_jst())
     action_id = next_id(undo_df, "action_id")
 
     prev_question = {
@@ -486,7 +489,7 @@ def mark_undo_done(ws, undo_df, action_id):
 
 def count_study_days_until(target_date, study_days, start_date=None):
     if start_date is None:
-        start_date = date.today()
+        start_date = today_jst()
 
     count = 0
     d = start_date
@@ -526,7 +529,7 @@ def estimate_finish_plan(total, touched, study_days, target_date_raw):
             "finish_date": "一周完了！"
         }
 
-    today = date.today()
+    today = today_jst()
 
     try:
         target_date = pd.to_datetime(target_date_raw).date()
@@ -564,7 +567,7 @@ def estimate_finish_plan(total, touched, study_days, target_date_raw):
 # =====================
 
 def generate_today_tasks(materials_df, questions_df, tasks_df, sheets):
-    today = date.today()
+    today = today_jst()
     today_str = str(today)
     new_rows = []
 
@@ -705,13 +708,13 @@ def build_today_tasks_df(tasks_df, questions_df, materials_df, hide_done=False):
         tasks_df,
         questions_df,
         materials_df,
-        date.today(),
+        today_jst(),
         hide_done=hide_done
     )
 
 
 def build_tomorrow_preview_df(materials_df, questions_df):
-    tomorrow = date.today() + timedelta(days=1)
+    tomorrow = today_jst() + timedelta(days=1)
     tomorrow_str = str(tomorrow)
     tomorrow_weekday = WEEKDAY_MAP[tomorrow.weekday()]
     preview_rows = []
@@ -823,7 +826,7 @@ def save_learning_log(
     comment
 ):
     log_id = next_id(logs_df, "log_id")
-    today_str = str(date.today())
+    today_str = str(today_jst())
 
     selected_q = questions_df[
         questions_df["question_id"].astype(str) == str(question_id)
@@ -871,22 +874,22 @@ def save_learning_log(
 
     elif result == "できた":
         new_status = "復習待ち"
-        next_review = date.today() + timedelta(days=1)
+        next_review = today_jst() + timedelta(days=1)
         new_round = current_round + 1
 
     elif result == "微妙":
         new_status = "復習待ち"
-        next_review = date.today() + timedelta(days=1)
+        next_review = today_jst() + timedelta(days=1)
         new_round = current_round + 1
 
     elif result == "できなかった":
         new_status = "苦手"
-        next_review = date.today() + timedelta(days=1)
+        next_review = today_jst() + timedelta(days=1)
         new_round = current_round + 1
 
     else:
         new_status = "未着手"
-        next_review = date.today() + timedelta(days=1)
+        next_review = today_jst() + timedelta(days=1)
         new_round = current_round
 
     update_question_row(
@@ -1560,7 +1563,7 @@ with tab_today:
                     st.error("その問題番号は見つかりません。")
                 else:
                     qid = target_q.iloc[0]["question_id"]
-                    today_str = str(date.today())
+                    today_str = str(today_jst())
 
                     if task_exists(tasks_df, today_str, qid, manual_task_type):
                         st.info("この問題はすでに今日のタスクに入っています。")
@@ -1709,7 +1712,7 @@ with tab_today:
                                 ok = update_task_row(
                                     sheets["daily_tasks"],
                                     tasks_df,
-                                    str(date.today()),
+                                    str(today_jst()),
                                     question_id,
                                     task_type,
                                     {
@@ -1781,7 +1784,7 @@ with tab_today:
                                 ok = delete_task(
                                     sheets["daily_tasks"],
                                     tasks_df,
-                                    str(date.today()),
+                                    str(today_jst()),
                                     question_id,
                                     task_type
                                 )
@@ -1965,7 +1968,7 @@ with tab_material:
                 )
 
                 if pd.isna(current_target_dt):
-                    current_target_date = date.today()
+                    current_target_date = today_jst()
                 else:
                     current_target_date = current_target_dt.date()
 
@@ -2120,7 +2123,7 @@ with tab_questions:
                 last_done_dt = pd.to_datetime(last_done_raw, errors="coerce")
 
                 if pd.isna(last_done_dt):
-                    default_next_review_date = date.today() + timedelta(days=1)
+                    default_next_review_date = today_jst() + timedelta(days=1)
                 else:
                     default_next_review_date = last_done_dt.date() + timedelta(days=1)
 
