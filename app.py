@@ -869,148 +869,372 @@ undo_df = load_sheet(sheets["undo_actions"])
 # CSS
 # =====================
 
+# =====================
+# CSS
+# =====================
+
+# =====================
+# CSS
+# =====================
+
 st.markdown(
     """
     <style>
+
+    /* =====================
+       背景
+    ===================== */
+
     .stApp {
         background:
-            radial-gradient(circle at top left, #ffe4ec 0, transparent 32%),
+            radial-gradient(circle at top left, #ffe8f0 0, transparent 35%),
             radial-gradient(circle at top right, #e0f2fe 0, transparent 28%),
-            linear-gradient(180deg, #fff7ed 0%, #fffafa 45%, #f8fafc 100%);
+            radial-gradient(circle at bottom right, #fef3c7 0, transparent 28%),
+            linear-gradient(180deg, #fffafc 0%, #fffdf8 55%, #f8fafc 100%);
     }
 
     .block-container {
         padding-top: 1.4rem;
         padding-bottom: 3rem;
-        max-width: 820px;
+        max-width: 840px;
     }
 
+    /* =====================
+       タイトル
+    ===================== */
+
     h1 {
-        font-size: 2.25rem !important;
-        line-height: 1.15 !important;
+        font-size: 2.3rem !important;
+        line-height: 1.1 !important;
         margin-bottom: 0.25rem !important;
         color: #7c2d12 !important;
+        letter-spacing: -0.03em;
+        font-weight: 900 !important;
     }
 
     h2, h3 {
         color: #7c2d12 !important;
     }
 
+    /* =====================
+       タブ
+    ===================== */
+
     .stTabs [data-baseweb="tab-list"] {
         gap: 0.35rem;
         overflow-x: auto;
         white-space: nowrap;
-        background: rgba(255,255,255,0.65);
-        padding: 0.35rem;
+
+        background: rgba(255,255,255,0.72);
+
+        padding: 0.38rem;
+
         border-radius: 999px;
-        border: 1px solid rgba(251, 207, 232, 0.8);
+
+        border: 1px solid rgba(251, 207, 232, 0.9);
+
+        box-shadow:
+            0 8px 24px rgba(244, 114, 182, 0.08);
     }
 
     .stTabs [data-baseweb="tab"] {
         font-size: 0.95rem;
-        padding: 0.45rem 0.85rem;
+        padding: 0.48rem 0.9rem;
         border-radius: 999px;
         color: #7c2d12;
+        font-weight: 700;
+        transition: 0.15s ease;
     }
 
     .stTabs [aria-selected="true"] {
-        background: linear-gradient(135deg, #fb7185, #f97316);
+        background:
+            linear-gradient(135deg, #fb7185, #f9a8d4);
+
         color: white !important;
-        font-weight: 700;
-        box-shadow: 0 6px 16px rgba(251, 113, 133, 0.25);
+
+        font-weight: 850;
+
+        box-shadow:
+            0 8px 18px rgba(251, 113, 133, 0.24);
     }
+
+    /* =====================
+       Metricカード
+    ===================== */
 
     div[data-testid="stMetric"] {
-        background: rgba(255, 255, 255, 0.86);
+
+        background: rgba(255, 255, 255, 0.96);
+
         border: 1px solid #fed7aa;
-        padding: 0.85rem;
-        border-radius: 18px;
-        box-shadow: 0 8px 22px rgba(251, 146, 60, 0.10);
+
+        padding: 1rem;
+
+        border-radius: 24px;
+
+        box-shadow:
+            0 10px 28px rgba(251, 146, 60, 0.10),
+            0 2px 8px rgba(0,0,0,0.03);
     }
+
+    /* =====================
+       通常カード
+    ===================== */
 
     div[data-testid="stVerticalBlockBorderWrapper"] {
-        background: rgba(255, 255, 255, 0.86);
-        border-radius: 22px;
-        border: 1px solid rgba(254, 202, 202, 0.9);
-        box-shadow: 0 10px 24px rgba(244, 114, 182, 0.10);
+
+        background: rgba(255, 255, 255, 0.98);
+
+        border-radius: 26px;
+
+        border: 1px solid rgba(255, 228, 230, 0.95);
+
+        box-shadow:
+            0 10px 30px rgba(244, 114, 182, 0.08),
+            0 2px 8px rgba(0,0,0,0.03);
+
+        padding: 0.7rem !important;
+
+        backdrop-filter: blur(8px);
+
+        margin-bottom: 1rem;
     }
 
+    /* =====================
+       ボタン
+    ===================== */
+
     button[kind="primary"] {
-        background: linear-gradient(135deg, #fb7185, #f97316) !important;
+
+        background:
+            linear-gradient(135deg, #fb7185, #fdba74) !important;
+
         border: none !important;
+
         border-radius: 999px !important;
+
         color: white !important;
-        font-weight: 700 !important;
-        box-shadow: 0 8px 18px rgba(251, 113, 133, 0.25);
+
+        font-weight: 800 !important;
+
+        box-shadow:
+            0 10px 20px rgba(251, 113, 133, 0.24);
+
+        transition: 0.15s ease;
+    }
+
+    button[kind="primary"]:hover {
+        transform: translateY(-2px);
     }
 
     .stButton > button {
+
         border-radius: 999px;
+
         border: 1px solid #fecaca;
-        background: #ffffffcc;
+
+        background: rgba(255,255,255,0.88);
+
         color: #7c2d12;
-        font-weight: 650;
+
+        font-weight: 700;
+
+        transition: 0.15s ease;
     }
 
     .stButton > button:hover {
+
         border-color: #fb7185;
+
         color: #be123c;
-        box-shadow: 0 8px 18px rgba(251, 113, 133, 0.16);
+
+        box-shadow:
+            0 8px 18px rgba(251, 113, 133, 0.16);
+
         transform: translateY(-1px);
     }
 
+    /* =====================
+       タスクタイトル
+    ===================== */
+
     .card-title {
-        font-size: 1.24rem;
-        font-weight: 800;
-        margin-bottom: 0.45rem;
+
+        font-size: 1.45rem;
+
+        font-weight: 900;
+
+        margin-bottom: 0.55rem;
+
+        color: #7c2d12;
+
+        line-height: 1.35;
+    }
+
+    /* =====================
+       ピル
+    ===================== */
+
+    .pill {
+
+        display: inline-block;
+
+        padding: 0.24rem 0.72rem;
+
+        border-radius: 999px;
+
+        background: #fff1f2;
+
+        border: 1px solid #fecdd3;
+
+        color: #9f1239;
+
+        margin-right: 0.3rem;
+
+        margin-bottom: 0.3rem;
+
+        font-size: 0.85rem;
+
+        font-weight: 750;
+    }
+
+    /* =====================
+       グループタイトル
+    ===================== */
+
+    .group-title {
+
+        font-size: 1.05rem;
+
+        font-weight: 900;
+
+        margin-top: 1.2rem;
+
+        margin-bottom: 0.7rem;
+
+        padding: 0.65rem 0.9rem;
+
+        background:
+            linear-gradient(135deg, #fff1f2, #fef9c3);
+
+        color: #9a3412;
+
+        border: 1px solid #fed7aa;
+
+        border-radius: 18px;
+
+        box-shadow:
+            0 6px 16px rgba(251, 146, 60, 0.10);
+    }
+
+    /* =====================
+       サブカード
+    ===================== */
+
+    .sub-card {
+
+        margin-top: 0.8rem;
+
+        margin-bottom: 1rem;
+
+        padding: 0.95rem 1rem;
+
+        border-radius: 24px;
+
+        background:
+            linear-gradient(
+                135deg,
+                rgba(255, 241, 242, 0.96),
+                rgba(255, 247, 237, 0.94)
+            );
+
+        border: 1px solid rgba(254, 202, 202, 0.95);
+
+        box-shadow:
+            0 10px 26px rgba(251, 113, 133, 0.10),
+            0 2px 8px rgba(0,0,0,0.03);
+
         color: #7c2d12;
     }
 
-    .pill {
-        display: inline-block;
-        padding: 0.22rem 0.62rem;
-        border-radius: 999px;
-        background: #fff1f2;
-        border: 1px solid #fecdd3;
-        color: #9f1239;
-        margin-right: 0.25rem;
-        margin-bottom: 0.25rem;
-        font-size: 0.85rem;
+    .sub-card-title {
+
+        font-size: 1rem;
+
+        font-weight: 900;
+
+        margin-bottom: 0.15rem;
+    }
+
+    .sub-card-text {
+
+        font-size: 0.92rem;
+
+        color: #9a3412;
+
         font-weight: 650;
     }
 
-    .group-title {
-        font-size: 1.05rem;
-        font-weight: 800;
-        margin-top: 1.2rem;
-        margin-bottom: 0.55rem;
-        padding: 0.55rem 0.8rem;
-        background: linear-gradient(135deg, #fff1f2, #ffedd5);
-        color: #9a3412;
-        border: 1px solid #fed7aa;
-        border-radius: 16px;
-        box-shadow: 0 6px 16px rgba(251, 146, 60, 0.10);
+    /* =====================
+       Expander
+    ===================== */
+
+    div[data-testid="stExpander"] {
+
+        border-radius: 18px;
+
+        border: 1px solid #fde68a;
+
+        background: rgba(255, 251, 235, 0.88);
+
+        margin-top: 0.7rem;
+
+        margin-bottom: 0.7rem;
+
+        overflow: hidden;
+
+        box-shadow:
+            0 4px 12px rgba(251, 191, 36, 0.06);
     }
+
+    /* =====================
+       Alert
+    ===================== */
 
     .stAlert {
         border-radius: 18px;
     }
 
-    div[data-testid="stExpander"] {
-        border-radius: 16px;
-        border: 1px solid #fde68a;
-        background: rgba(255, 251, 235, 0.65);
-    }
+    /* =====================
+       Input
+    ===================== */
 
     input, textarea {
-        border-radius: 12px !important;
+
+        border-radius: 14px !important;
     }
+
+    /* =====================
+       スクロールバー
+    ===================== */
+
+    ::-webkit-scrollbar {
+        width: 10px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: #f9a8d4;
+        border-radius: 999px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
     </style>
     """,
     unsafe_allow_html=True
 )
-
-
 # =====================
 # 画面
 # =====================
@@ -1020,6 +1244,53 @@ top_col1, top_col2 = st.columns([3, 1])
 with top_col1:
     st.markdown("# 📚 Study Progress")
     st.caption("問題単位で進捗・復習・翌日のタスクを管理するアプリ")
+
+    st.markdown(
+        """
+        <div class="sub-card">
+            <div class="sub-card-title">🌸 今日も少しずつ積み上げよう</div>
+            <div class="sub-card-text">
+                完璧じゃなくてOK。1問進めば、ちゃんと前に進んでる。
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+    col1, col2, col3 = st.columns(3)
+
+    with col1:
+        st.markdown(
+            """
+            <div class="sub-card">
+                <div class="sub-card-title">🔥 連続学習</div>
+                <div class="sub-card-text">3日継続中！</div>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+    with col2:
+        st.markdown(
+            """
+            <div class="sub-card">
+                <div class="sub-card-title">📚 今日の目標</div>
+                <div class="sub-card-text">あと4問！</div>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+    with col3:
+        st.markdown(
+            """
+            <div class="sub-card">
+                <div class="sub-card-title">🌸 ペース</div>
+                <div class="sub-card-text">いい感じ！</div>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
 
 with top_col2:
     if st.button("🔄 更新", use_container_width=True):
@@ -1032,8 +1303,6 @@ tab_today, tab_material, tab_questions, tab_record, tab_progress = st.tabs([
     "記録",
     "進捗"
 ])
-
-
 # =====================
 # 今日
 # =====================
