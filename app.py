@@ -24,7 +24,7 @@ WEEKDAY_MAP = {
     6: "日",
 }
 
-WEEKDAYS = ["月", "火", "水", "金", "土", "日"]
+WEEKDAYS = ["月", "火", "水","木", "金", "土", "日"]
 
 
 # =====================
@@ -93,9 +93,24 @@ def connect_sheets():
 # 共通関数
 # =====================
 
-def load_sheet(ws):
-    records = ws.get_all_records()
+@st.cache_data(ttl=30, show_spinner=False)
+def load_sheet(_ws, cache_key):
+    """
+    Google Sheets の読み込みを30秒キャッシュする。
+    _ws は先頭がアンダースコアなので Streamlit のハッシュ対象外。
+    cache_key でシートごとにキャッシュを分ける。
+    """
+    records = _ws.get_all_records()
     return pd.DataFrame(records)
+
+
+def refresh_data_and_rerun():
+    """
+    書き込み後だけキャッシュを消して再読み込みする。
+    通常の画面再描画では30秒キャッシュを使うので、API読み込みを抑えられる。
+    """
+    st.cache_data.clear()
+    st.rerun()
 
 
 def safe_str(value):
@@ -190,7 +205,12 @@ def update_material_row(ws, materials_df, material_id, new_values):
 
 
 def update_task_status(ws, tasks_df, task_date, question_id, task_type, new_status):
-    if tasks_df.empty:
+    """
+    タスク状態だけを更新する。
+    以前は row_values() で1回読んでから update() していたが、
+    statusセルだけを update_cell() することで Read API を使わない。
+    """
+    if tasks_df.empty or "status" not in tasks_df.columns:
         return False
 
     target = tasks_df[
@@ -203,21 +223,9 @@ def update_task_status(ws, tasks_df, task_date, question_id, task_type, new_stat
         return False
 
     sheet_row = target.index[0] + 2
-    headers = list(tasks_df.columns)
-    row_values = ws.row_values(sheet_row)
-
-    while len(row_values) < len(headers):
-        row_values.append("")
-
-    if "status" not in headers:
-        return False
-
-    row_values[headers.index("status")] = new_status
-    end_col = col_letter(len(headers))
-
-    ws.update(f"A{sheet_row}:{end_col}{sheet_row}", [row_values])
+    status_col = list(tasks_df.columns).index("status") + 1
+    ws.update_cell(sheet_row, status_col, new_status)
     return True
-
 
 def update_task_row(ws, tasks_df, task_date, question_id, task_type, new_values):
     if tasks_df.empty:
@@ -366,6 +374,7 @@ def reset_tasks_for_question(ws, tasks_df, question_id):
     """
     指定した問題に紐づくタスクを未完了に戻す。
     タスク自体は消さない。
+    複数行をまとめて batch_update するので API 消費を抑える。
     """
     if tasks_df.empty or "status" not in tasks_df.columns:
         return 0
@@ -378,23 +387,20 @@ def reset_tasks_for_question(ws, tasks_df, question_id):
         return 0
 
     headers = list(tasks_df.columns)
-    status_idx = headers.index("status")
-    count = 0
+    status_col_letter = col_letter(headers.index("status") + 1)
 
+    updates = []
     for idx, _ in target.iterrows():
         sheet_row = idx + 2
-        row_values = ws.row_values(sheet_row)
+        updates.append({
+            "range": f"{status_col_letter}{sheet_row}",
+            "values": [["未完了"]]
+        })
 
-        while len(row_values) < len(headers):
-            row_values.append("")
+    if updates:
+        ws.batch_update(updates)
 
-        row_values[status_idx] = "未完了"
-        end_col = col_letter(len(headers))
-        ws.update(f"A{sheet_row}:{end_col}{sheet_row}", [row_values])
-        count += 1
-
-    return count
-
+    return len(updates)
 
 def reset_question_before_learning(sheets, questions_df, logs_df, tasks_df, question_id):
     """
@@ -759,7 +765,7 @@ def save_learning_log(
 
     selected_q = selected_q.iloc[0]
 
-    undo_df = load_sheet(sheets["undo_actions"])
+    undo_df = load_sheet(sheets["undo_actions"], "undo_actions")
 
     save_undo_action(
         sheets=sheets,
@@ -848,8 +854,7 @@ def show_result_effect(result):
     else:
         st.info("未完了として保存したよ。明日に回そう。")
 
-    time.sleep(1.5)
-    st.rerun()
+    refresh_data_and_rerun()
 
 
 # =====================
@@ -858,11 +863,11 @@ def show_result_effect(result):
 
 sheets = connect_sheets()
 
-materials_df = load_sheet(sheets["materials"])
-questions_df = load_sheet(sheets["questions"])
-logs_df = load_sheet(sheets["logs"])
-tasks_df = load_sheet(sheets["daily_tasks"])
-undo_df = load_sheet(sheets["undo_actions"])
+materials_df = load_sheet(sheets["materials"], "materials")
+questions_df = load_sheet(sheets["questions"], "questions")
+logs_df = load_sheet(sheets["logs"], "logs")
+tasks_df = load_sheet(sheets["daily_tasks"], "daily_tasks")
+undo_df = load_sheet(sheets["undo_actions"], "undo_actions")
 
 
 # =====================
@@ -1294,7 +1299,7 @@ with top_col1:
 
 with top_col2:
     if st.button("🔄 更新", use_container_width=True):
-        st.rerun()
+        refresh_data_and_rerun()
 
 tab_today, tab_material, tab_questions, tab_record, tab_progress = st.tabs([
     "今日",
@@ -1329,9 +1334,7 @@ with tab_today:
                 else:
                     st.success(f"{count}件のタスクを作成しました。")
                     st.balloons()
-                    time.sleep(1.2)
-
-                st.rerun()
+                    refresh_data_and_rerun()
 
     with col_info:
         st.caption("復習・苦手問題・新規問題を自動で今日のタスクに入れます。")
@@ -1339,10 +1342,10 @@ with tab_today:
     st.divider()
     st.markdown("### ↩️ 直前の記録を取り消す")
 
-    undo_df_now = load_sheet(sheets["undo_actions"])
-    logs_df_now = load_sheet(sheets["logs"])
-    tasks_df_now = load_sheet(sheets["daily_tasks"])
-    questions_df_now = load_sheet(sheets["questions"])
+    undo_df_now = undo_df.copy()
+    logs_df_now = logs_df.copy()
+    tasks_df_now = tasks_df.copy()
+    questions_df_now = questions_df.copy()
 
     if undo_df_now.empty:
         st.info("取り消せる操作はありません。")
@@ -1414,8 +1417,7 @@ with tab_today:
                     )
 
                     st.success("一つ前の状態に戻しました。")
-                    time.sleep(1.0)
-                    st.rerun()
+                    refresh_data_and_rerun()
 
                 except Exception as e:
                     st.error(f"取り消しに失敗しました：{e}")
@@ -1507,8 +1509,7 @@ with tab_today:
 
                         st.success(f"第{manual_question_number}問を今日のタスクに追加しました！🎯")
                         st.balloons()
-                        time.sleep(1.2)
-                        st.rerun()
+                        refresh_data_and_rerun()
 
     st.divider()
 
@@ -1645,8 +1646,7 @@ with tab_today:
 
                                 if ok:
                                     st.success("タスク情報を更新しました。")
-                                    time.sleep(1.0)
-                                    st.rerun()
+                                    refresh_data_and_rerun()
                                 else:
                                     st.error("更新対象が見つかりませんでした。")
 
@@ -1713,8 +1713,7 @@ with tab_today:
 
                                 if ok:
                                     st.warning("タスクを削除しました。")
-                                    time.sleep(1.0)
-                                    st.rerun()
+                                    refresh_data_and_rerun()
                                 else:
                                     st.error("削除対象が見つかりませんでした。")
 
@@ -1833,8 +1832,7 @@ with tab_material:
                     f"{material_name} を登録し、第1問〜第{int(total_questions)}問を作成しました。"
                 )
                 st.balloons()
-                time.sleep(1.2)
-                st.rerun()
+                refresh_data_and_rerun()
 
     st.divider()
     st.markdown("### 登録済み教材を編集")
@@ -1933,8 +1931,7 @@ with tab_material:
 
                         if ok:
                             st.success("教材情報を更新しました。")
-                            time.sleep(1.0)
-                            st.rerun()
+                            refresh_data_and_rerun()
                         else:
                             st.error("更新対象の教材が見つかりませんでした。")
 
@@ -2087,8 +2084,7 @@ with tab_questions:
                         st.success(
                             f"未着手に戻しました。学習ログ {deleted_logs} 件を削除し、タスク {reset_tasks} 件を未完了に戻しました。"
                         )
-                        time.sleep(1.2)
-                        st.rerun()
+                        refresh_data_and_rerun()
 
                     else:
                         ok = update_question_row(
@@ -2108,8 +2104,7 @@ with tab_questions:
 
                         if ok:
                             st.success("問題情報を更新しました。")
-                            time.sleep(1.0)
-                            st.rerun()
+                            refresh_data_and_rerun()
                         else:
                             st.error("更新対象の問題が見つかりませんでした。")
 
@@ -2230,7 +2225,7 @@ with tab_record:
                 show_result_effect(result)
 
     st.divider()
-    logs_df = load_sheet(sheets["logs"])
+    logs_df = load_sheet(sheets["logs"], "logs")
 
     st.markdown("### 最近の記録")
 
