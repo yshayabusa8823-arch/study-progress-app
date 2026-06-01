@@ -103,6 +103,32 @@ def load_sheet(_ws, cache_key):
     records = _ws.get_all_records()
     return pd.DataFrame(records)
 
+def load_sheet_live(ws):
+    records = ws.get_all_records()
+    return pd.DataFrame(records)
+
+
+def load_all_data_live(sheets):
+    return {
+        "materials_df": load_sheet_live(sheets["materials"]),
+        "questions_df": load_sheet_live(sheets["questions"]),
+        "logs_df": load_sheet_live(sheets["logs"]),
+        "tasks_df": load_sheet_live(sheets["daily_tasks"]),
+        "undo_df": load_sheet_live(sheets["undo_actions"]),
+    }
+
+
+def ensure_date_fresh():
+    today_key = str(date.today())
+
+    if "app_today_key" not in st.session_state:
+        st.session_state["app_today_key"] = today_key
+        return
+
+    if st.session_state["app_today_key"] != today_key:
+        st.session_state["app_today_key"] = today_key
+        st.cache_data.clear()
+        st.rerun()
 
 def refresh_data_and_rerun():
     """
@@ -906,6 +932,8 @@ def show_result_effect(result):
 
 sheets = connect_sheets()
 
+ensure_date_fresh()
+
 materials_df = load_sheet(sheets["materials"], "materials")
 questions_df = load_sheet(sheets["questions"], "questions")
 logs_df = load_sheet(sheets["logs"], "logs")
@@ -1365,15 +1393,19 @@ with tab_today:
             if materials_df.empty or questions_df.empty:
                 st.error("先に教材を登録してください。")
             else:
+                live = load_all_data_live(sheets)
+
                 count = generate_today_tasks(
-                    materials_df,
-                    questions_df,
-                    tasks_df,
+                    live["materials_df"],
+                    live["questions_df"],
+                    live["tasks_df"],
                     sheets
                 )
 
                 if count == 0:
+                    st.cache_data.clear()
                     st.info("新しく追加するタスクはありませんでした。")
+                    st.rerun()
                 else:
                     st.success(f"{count}件のタスクを作成しました。")
                     st.balloons()
