@@ -1210,463 +1210,337 @@ st.markdown(
     """
     <style>
 
-    /* =====================
-       ブルベ夏 × 高級感 × ガラス風
-       黒文字強化版
-    ===================== */
-    /* =====================
-   背景を少し濃く
-   （ここだけ差し替え）
-===================== */
+    .stApp {
+        background:
+            radial-gradient(circle at top left, rgba(167,139,250,0.24) 0%, transparent 30%),
+            radial-gradient(circle at top right, rgba(147,197,253,0.18) 0%, transparent 28%),
+            radial-gradient(circle at bottom left, rgba(216,180,254,0.16) 0%, transparent 26%),
+            linear-gradient(
+                135deg,
+                #eeeaff 0%,
+                #e9e7ff 26%,
+                #e8ecff 52%,
+                #f0f4ff 78%,
+                #f7f9ff 100%
+            );
+        background-attachment: fixed;
+    }
 
-.stApp {
+    .stApp::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 0;
+        opacity: 0.55;
 
-    background:
-        radial-gradient(circle at top left, rgba(167,139,250,0.22) 0%, transparent 30%),
-        radial-gradient(circle at top right, rgba(147,197,253,0.18) 0%, transparent 26%),
-        radial-gradient(circle at bottom left, rgba(216,180,254,0.14) 0%, transparent 24%),
+        background-image:
+            radial-gradient(circle at 8% 12%, rgba(255,255,255,0.95) 0px, rgba(255,255,255,0.95) 2px, transparent 3px),
+            radial-gradient(circle at 22% 18%, rgba(255,255,255,0.8) 0px, rgba(255,255,255,0.8) 1.5px, transparent 2.5px),
+            radial-gradient(circle at 38% 10%, rgba(255,255,255,0.95) 0px, rgba(255,255,255,0.95) 2.2px, transparent 3px),
+            radial-gradient(circle at 52% 16%, rgba(216,180,254,0.9) 0px, rgba(216,180,254,0.9) 2px, transparent 3px),
+            radial-gradient(circle at 70% 9%, rgba(255,255,255,0.95) 0px, rgba(255,255,255,0.95) 2px, transparent 3px),
+            radial-gradient(circle at 88% 14%, rgba(191,219,254,0.95) 0px, rgba(191,219,254,0.95) 2px, transparent 3px),
+            radial-gradient(circle at 12% 42%, rgba(255,255,255,0.85) 0px, rgba(255,255,255,0.85) 1.8px, transparent 2.8px),
+            radial-gradient(circle at 30% 38%, rgba(255,255,255,0.95) 0px, rgba(255,255,255,0.95) 2px, transparent 3px),
+            radial-gradient(circle at 46% 48%, rgba(216,180,254,0.9) 0px, rgba(216,180,254,0.9) 2px, transparent 3px),
+            radial-gradient(circle at 64% 36%, rgba(255,255,255,0.9) 0px, rgba(255,255,255,0.9) 2px, transparent 3px),
+            radial-gradient(circle at 82% 44%, rgba(255,255,255,0.95) 0px, rgba(255,255,255,0.95) 2.2px, transparent 3px),
+            radial-gradient(circle at 92% 34%, rgba(191,219,254,0.95) 0px, rgba(191,219,254,0.95) 2px, transparent 3px),
+            radial-gradient(circle at 18% 72%, rgba(255,255,255,0.95) 0px, rgba(255,255,255,0.95) 2px, transparent 3px),
+            radial-gradient(circle at 38% 82%, rgba(216,180,254,0.85) 0px, rgba(216,180,254,0.85) 2px, transparent 3px),
+            radial-gradient(circle at 56% 74%, rgba(255,255,255,0.9) 0px, rgba(255,255,255,0.9) 2px, transparent 3px),
+            radial-gradient(circle at 74% 84%, rgba(255,255,255,0.95) 0px, rgba(255,255,255,0.95) 2px, transparent 3px),
+            radial-gradient(circle at 90% 76%, rgba(191,219,254,0.95) 0px, rgba(191,219,254,0.95) 2px, transparent 3px);
 
-        linear-gradient(
-            135deg,
-            #f3f0ff 0%,
-            #ece8ff 22%,
-            #e8e9ff 42%,
-            #eef2ff 65%,
-            #f5f7ff 100%
-        );
+        animation: sparkleMove 18s ease-in-out infinite alternate;
+    }
 
-    background-attachment: fixed;
-}
+    .stApp::after {
+        content:
+            "✦        ✧             ✦"
+            "      ⋆         ✦";
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 0;
+        white-space: pre-wrap;
+        color: rgba(255,255,255,0.82);
+        font-size: 26px;
+        line-height: 180px;
+        letter-spacing: 38px;
+        padding: 40px;
+        opacity: 0.42;
+        text-shadow:
+            0 0 10px rgba(255,255,255,0.95),
+            0 0 22px rgba(255,255,255,0.7),
+            0 0 34px rgba(196,181,253,0.55);
+        animation: sparkleFloat 12s ease-in-out infinite alternate;
+    }
+
+    @keyframes sparkleMove {
+        0% {
+            transform: translateY(0px) translateX(0px);
+        }
+        100% {
+            transform: translateY(-10px) translateX(8px);
+        }
+    }
+
+    @keyframes sparkleFloat {
+        0% {
+            transform: translateY(0px);
+        }
+        100% {
+            transform: translateY(-14px);
+        }
+    }
 
     .block-container {
-
-        max-width: 880px;
-
-        padding-top: 1.4rem;
-
+        max-width: 900px;
+        padding-top: 1.5rem;
         padding-bottom: 3rem;
     }
 
-    /* =====================
-       タイトル
-    ===================== */
-
     h1 {
-
         color: #000000 !important;
-
-        font-size: 2.7rem !important;
-
+        font-size: 2.75rem !important;
         font-weight: 1000 !important;
-
         letter-spacing: -0.06em;
-
         line-height: 1.05;
-
         margin-bottom: 0.35rem !important;
     }
 
-    h2,
-    h3 {
-
-        color: #000000 !important;
-
-        font-weight: 1000 !important;
-
-        letter-spacing: -0.03em;
+    h1::after {
+        content: " ✦";
+        color: #b8b5ff;
+        font-size: 0.8em;
+        margin-left: 8px;
     }
 
+    h2,
+    h3,
     .stMarkdown h3 {
-
         color: #000000 !important;
-
         font-weight: 1000 !important;
+        letter-spacing: -0.03em;
     }
 
     p,
     span,
     label {
-
         color: #222222;
     }
 
-    /* =====================
-       区切り線
-    ===================== */
-
     hr {
-
         border: none;
-
         height: 1px;
-
-        background:
-            linear-gradient(
-                90deg,
-                transparent,
-                #d7d9ee,
-                transparent
-            );
-
-        margin: 1.6rem 0;
+        background: linear-gradient(90deg, transparent, rgba(170,170,210,0.55), transparent);
+        margin: 1.7rem 0;
     }
 
-    /* =====================
-       タブ
-    ===================== */
-
     .stTabs [data-baseweb="tab-list"] {
-
-        background: rgba(255,255,255,0.34);
-
+        background: rgba(255,255,255,0.36);
         backdrop-filter: blur(24px);
-
         border-radius: 999px;
-
         padding: 0.42rem;
-
-        border: 1px solid rgba(255,255,255,0.82);
-
-        box-shadow:
-            0 10px 28px rgba(180, 188, 255, 0.08);
-
+        border: 1px solid rgba(255,255,255,0.86);
+        box-shadow: 0 10px 28px rgba(180,188,255,0.10);
         gap: 0.35rem;
     }
 
     .stTabs [data-baseweb="tab"] {
-
         border-radius: 999px;
-
         color: #444444;
-
         font-weight: 900;
-
         padding: 0.52rem 1rem;
-
         transition: all 0.16s ease;
     }
 
     .stTabs [aria-selected="true"] {
+        background: linear-gradient(135deg, #c7c3ff, #ddd7ff, #edf2ff);
+        color: #000000 !important;
+        box-shadow: 0 8px 22px rgba(196,181,253,0.18);
+    }
 
+    div[data-testid="stVerticalBlockBorderWrapper"] {
+        background: rgba(255,255,255,0.34);
+        backdrop-filter: blur(26px);
+        border-radius: 34px;
+        border: 1px solid rgba(255,255,255,0.86);
+        padding: 1.05rem !important;
+        margin-bottom: 1.2rem;
+        box-shadow:
+            0 16px 36px rgba(196,181,253,0.10),
+            0 4px 14px rgba(180,188,255,0.07);
+    }
+
+    .sub-card {
         background:
             linear-gradient(
                 135deg,
-                #c7c3ff,
-                #ddd7ff,
-                #edf2ff
+                rgba(255,255,255,0.50),
+                rgba(245,243,255,0.34),
+                rgba(239,246,255,0.28)
             );
-
-        color: #000000 !important;
-
-        box-shadow:
-            0 8px 22px rgba(196, 181, 253, 0.16);
-    }
-
-    /* =====================
-       カード
-    ===================== */
-
-    div[data-testid="stVerticalBlockBorderWrapper"] {
-
-        background: rgba(255,255,255,0.28);
-
         backdrop-filter: blur(26px);
-
-        border-radius: 34px;
-
-        border: 1px solid rgba(255,255,255,0.78);
-
-        padding: 1rem !important;
-
-        margin-bottom: 1rem;
-
+        border-radius: 30px;
+        padding: 1rem 1.1rem;
+        border: 1px solid rgba(255,255,255,0.92);
         box-shadow:
-            0 16px 36px rgba(196,181,253,0.06),
-            0 4px 14px rgba(180,188,255,0.05);
+            0 14px 32px rgba(196,181,253,0.12),
+            inset 0 1px 0 rgba(255,255,255,0.55);
+        margin-bottom: 1rem;
     }
 
-    /* =====================
-       Metric
-    ===================== */
+    .sub-card-title {
+        font-size: 1.02rem;
+        font-weight: 1000;
+        color: #000000;
+        margin-bottom: 0.22rem;
+    }
+
+    .sub-card-text {
+        color: #333333;
+        font-weight: 750;
+    }
 
     div[data-testid="stMetric"] {
-
-        background: rgba(255,255,255,0.24);
-
-        backdrop-filter: blur(20px);
-
+        background:
+            linear-gradient(
+                135deg,
+                rgba(255,255,255,0.48),
+                rgba(245,243,255,0.32)
+            );
+        backdrop-filter: blur(24px);
         border-radius: 30px;
-
-        border: 1px solid rgba(255,255,255,0.82);
-
+        border: 1px solid rgba(255,255,255,0.92);
         padding: 1rem;
-
         box-shadow:
-            0 10px 24px rgba(196,181,253,0.08);
+            0 14px 32px rgba(196,181,253,0.12),
+            inset 0 1px 0 rgba(255,255,255,0.55);
     }
 
     div[data-testid="stMetricLabel"] {
-
         color: #111111 !important;
-
         font-weight: 950 !important;
-
         opacity: 1 !important;
     }
 
     div[data-testid="stMetricValue"] {
-
         color: #000000 !important;
-
         font-weight: 1000 !important;
     }
 
-    /* =====================
-       ボタン
-    ===================== */
-
-    .stButton > button,
-    button[kind="primary"] {
-
+    .group-title {
         background:
             linear-gradient(
                 135deg,
-                #d7d3ff,
-                #e6e2ff
-            ) !important;
-
-        border: 1px solid rgba(199,195,255,0.75) !important;
-
-        border-radius: 999px !important;
-
-        color: #000000 !important;
-
-        font-weight: 950 !important;
-
-        font-size: 1rem !important;
-
-        padding: 0.78rem 1.2rem !important;
-
+                rgba(255,255,255,0.50),
+                rgba(242,239,255,0.40),
+                rgba(244,247,255,0.34)
+            );
+        backdrop-filter: blur(24px);
+        color: #000000;
+        border-radius: 26px;
+        padding: 0.85rem 1.05rem;
+        font-size: 1.05rem;
+        font-weight: 1000;
+        margin-top: 1.2rem;
+        margin-bottom: 0.8rem;
+        border: 1px solid rgba(255,255,255,0.92);
         box-shadow:
-            0 8px 20px rgba(196,181,253,0.10);
+            0 12px 28px rgba(196,181,253,0.11),
+            inset 0 1px 0 rgba(255,255,255,0.55);
+    }
 
+    .stButton > button,
+    button[kind="primary"] {
+        background: linear-gradient(135deg, #d7d3ff, #e6e2ff) !important;
+        border: 1px solid rgba(199,195,255,0.75) !important;
+        border-radius: 999px !important;
+        color: #000000 !important;
+        font-weight: 950 !important;
+        font-size: 1rem !important;
+        padding: 0.78rem 1.2rem !important;
+        box-shadow: 0 8px 20px rgba(196,181,253,0.14);
         transition: all 0.16s ease;
     }
 
     .stButton > button:hover,
     button[kind="primary"]:hover {
-
-        transform: translateY(-2px);
-
-        background:
-            linear-gradient(
-                135deg,
-                #d1ccff,
-                #e2dcff
-            ) !important;
-
-        box-shadow:
-            0 14px 28px rgba(196,181,253,0.16);
+        transform: translateY(-2px) scale(1.015);
+        filter: brightness(1.03);
+        background: linear-gradient(135deg, #d1ccff, #e2dcff) !important;
+        box-shadow: 0 14px 28px rgba(196,181,253,0.20);
     }
-
-    /* =====================
-       サブカード
-    ===================== */
-
-    .sub-card {
-
-        background:
-            linear-gradient(
-                135deg,
-                rgba(255,255,255,0.34),
-                rgba(245,243,255,0.22),
-                rgba(239,246,255,0.18)
-            );
-
-        backdrop-filter: blur(24px);
-
-        border-radius: 32px;
-
-        padding: 1rem 1.1rem;
-
-        border: 1px solid rgba(255,255,255,0.82);
-
-        box-shadow:
-            0 10px 24px rgba(196,181,253,0.06);
-
-        margin-bottom: 1rem;
-    }
-
-    .sub-card-title {
-
-        font-size: 1.02rem;
-
-        font-weight: 1000;
-
-        color: #000000;
-
-        margin-bottom: 0.22rem;
-    }
-
-    .sub-card-text {
-
-        color: #333333;
-
-        font-weight: 700;
-    }
-
-    /* =====================
-       グループタイトル
-    ===================== */
-
-    .group-title {
-
-        background:
-            linear-gradient(
-                135deg,
-                #f2efff,
-                #f7f5ff,
-                #f4f7ff
-            );
-
-        color: #000000;
-
-        border-radius: 24px;
-
-        padding: 0.8rem 1rem;
-
-        font-size: 1.02rem;
-
-        font-weight: 1000;
-
-        margin-top: 1.2rem;
-
-        margin-bottom: 0.8rem;
-
-        border: 1px solid rgba(255,255,255,0.82);
-
-        box-shadow:
-            0 8px 20px rgba(196,181,253,0.08);
-    }
-
-    /* =====================
-       ピル
-    ===================== */
-
-    .pill {
-
-        display: inline-block;
-
-        padding: 0.28rem 0.82rem;
-
-        border-radius: 999px;
-
-        background:
-            linear-gradient(
-                135deg,
-                #f3f1ff,
-                #eef3ff
-            );
-
-        color: #444444;
-
-        font-weight: 850;
-
-        border: 1px solid rgba(255,255,255,0.82);
-
-        margin-right: 0.35rem;
-
-        margin-bottom: 0.35rem;
-    }
-
-    /* =====================
-       Expander
-    ===================== */
-
-    div[data-testid="stExpander"] {
-
-        background: rgba(255,255,255,0.22);
-
-        backdrop-filter: blur(22px);
-
-        border-radius: 26px;
-
-        border: 1px solid rgba(255,255,255,0.82);
-
-        overflow: hidden;
-
-        box-shadow:
-            0 8px 18px rgba(196,181,253,0.06);
-
-        margin-top: 0.7rem;
-
-        margin-bottom: 0.7rem;
-    }
-
-    /* =====================
-       入力欄
-    ===================== */
 
     input,
     textarea {
-
         border-radius: 18px !important;
-
         border: 1px solid #e3e5ff !important;
-
-        background: rgba(255,255,255,0.46) !important;
-
+        background: rgba(255,255,255,0.50) !important;
         color: #000000 !important;
     }
 
     div[data-baseweb="select"] > div {
-
         border-radius: 18px !important;
-
         border-color: #e3e5ff !important;
-
-        background: rgba(255,255,255,0.42) !important;
-
+        background: rgba(255,255,255,0.48) !important;
         color: #000000 !important;
     }
 
-    /* =====================
-       Progress Bar
-    ===================== */
-
-    div[data-testid="stProgress"] > div > div > div {
-
-        background:
-            linear-gradient(
-                135deg,
-                #c7c3ff,
-                #d7dfff
-            );
+    div[data-testid="stProgress"] {
+        height: 14px;
+        border-radius: 999px;
+        overflow: hidden;
+        background: rgba(255,255,255,0.34);
+        border: 1px solid rgba(255,255,255,0.55);
+        box-shadow: inset 0 2px 6px rgba(180,188,255,0.16);
     }
 
-    /* =====================
-       スクロールバー
-    ===================== */
+    div[data-testid="stProgress"] > div {
+        background: rgba(255,255,255,0.28);
+        border-radius: 999px;
+    }
+
+    div[data-testid="stProgress"] > div > div > div {
+        border-radius: 999px;
+        background:
+            linear-gradient(
+                90deg,
+                #a78bfa 0%,
+                #b794f6 45%,
+                #c4b5fd 100%
+            );
+        box-shadow:
+            0 0 10px rgba(167,139,250,0.45),
+            0 0 20px rgba(196,181,253,0.32);
+        animation: progressGlow 2.8s ease-in-out infinite;
+    }
+
+    @keyframes progressGlow {
+        0% {
+            filter: brightness(1);
+        }
+        50% {
+            filter: brightness(1.12);
+        }
+        100% {
+            filter: brightness(1);
+        }
+    }
 
     ::-webkit-scrollbar {
-
         width: 10px;
     }
 
     ::-webkit-scrollbar-thumb {
-
-        background:
-            linear-gradient(
-                180deg,
-                #c7c3ff,
-                #dbeafe
-            );
-
+        background: linear-gradient(180deg, #c7c3ff, #dbeafe);
         border-radius: 999px;
     }
 
     ::-webkit-scrollbar-track {
-
         background: transparent;
     }
 
