@@ -652,6 +652,122 @@ def task_exists(tasks_df, task_date, question_id, task_type=None):
 
     return not matched.empty
 
+def calc_today_summary(tasks_df):
+    today_str = str(today_jst())
+
+    if tasks_df.empty:
+        return {
+            "total": 0,
+            "done": 0,
+            "remaining": 0
+        }
+
+    today_tasks = tasks_df[
+        tasks_df["task_date"].astype(str) == today_str
+    ].copy()
+
+    if today_tasks.empty:
+        return {
+            "total": 0,
+            "done": 0,
+            "remaining": 0
+        }
+
+    total = len(today_tasks)
+
+    if "status" in today_tasks.columns:
+        done = len(today_tasks[
+            today_tasks["status"].astype(str) == "完了"
+        ])
+    else:
+        done = 0
+
+    remaining = total - done
+
+    return {
+        "total": total,
+        "done": done,
+        "remaining": remaining
+    }
+
+
+def calc_pace_summary(materials_df, questions_df):
+    if materials_df.empty or questions_df.empty:
+        return {
+            "status": "データなし",
+            "message": "教材を登録すると判定します"
+        }
+
+    today = today_jst()
+    total_needed_today = 0
+    danger_count = 0
+
+    for _, material in materials_df.iterrows():
+        material_id = material["material_id"]
+        study_days = safe_str(material.get("study_days", "")).split(",")
+        study_days = [d for d in study_days if d in WEEKDAYS]
+
+        if not study_days:
+            continue
+
+        qs = questions_df[
+            questions_df["material_id"].astype(str) == str(material_id)
+        ]
+
+        if qs.empty:
+            continue
+
+        total = len(qs)
+        touched = len(qs[
+            qs["status"].astype(str).isin(["復習待ち", "苦手", "完了", "学習中"])
+        ])
+
+        remaining = max(total - touched, 0)
+
+        if remaining == 0:
+            continue
+
+        target_dt = pd.to_datetime(
+            material.get("target_date", ""),
+            errors="coerce"
+        )
+
+        if pd.isna(target_dt):
+            continue
+
+        target_date = target_dt.date()
+
+        study_days_left = count_study_days_until(
+            target_date,
+            study_days,
+            start_date=today
+        )
+
+        needed_per_study_day = max(1, -(-remaining // study_days_left))
+
+        if WEEKDAY_MAP[today.weekday()] in study_days:
+            total_needed_today += needed_per_study_day
+
+        if study_days_left <= 3 and remaining > needed_per_study_day * study_days_left:
+            danger_count += 1
+
+    if total_needed_today == 0:
+        return {
+            "status": "休息日",
+            "message": "今日は進める予定の教材が少なめ"
+        }
+
+    if danger_count > 0:
+        return {
+            "status": "要注意",
+            "message": f"今日は目安 {total_needed_today} 問。遅れ気味の教材あり"
+        }
+
+    return {
+        "status": "順調",
+        "message": f"今日は目安 {total_needed_today} 問ペース"
+    }
+
 def estimate_finish_plan(total, touched, study_days, target_date_raw):
     remaining = max(total - touched, 0)
 
@@ -1583,14 +1699,19 @@ with top_col1:
         unsafe_allow_html=True
     )
 
+    today_summary = calc_today_summary(tasks_df)
+    pace_summary = calc_pace_summary(materials_df, questions_df)
+
     col1, col2, col3 = st.columns(3)
 
     with col1:
         st.markdown(
-            """
+            f"""
             <div class="sub-card">
-                <div class="sub-card-title">🔥 連続学習</div>
-                <div class="sub-card-text">3日継続中！</div>
+                <div class="sub-card-title">📌 今日のタスク</div>
+                <div class="sub-card-text">
+                    全 {today_summary["total"]} 問 / 完了 {today_summary["done"]} 問
+                </div>
             </div>
             """,
             unsafe_allow_html=True
@@ -1598,10 +1719,12 @@ with top_col1:
 
     with col2:
         st.markdown(
-            """
+            f"""
             <div class="sub-card">
                 <div class="sub-card-title">📚 今日の目標</div>
-                <div class="sub-card-text">あと4問！</div>
+                <div class="sub-card-text">
+                    あと {today_summary["remaining"]} 問！
+                </div>
             </div>
             """,
             unsafe_allow_html=True
@@ -1609,10 +1732,12 @@ with top_col1:
 
     with col3:
         st.markdown(
-            """
+            f"""
             <div class="sub-card">
-                <div class="sub-card-title">🌸 ペース</div>
-                <div class="sub-card-text">いい感じ！</div>
+                <div class="sub-card-title">🌸 ペース：{pace_summary["status"]}</div>
+                <div class="sub-card-text">
+                    {pace_summary["message"]}
+                </div>
             </div>
             """,
             unsafe_allow_html=True
