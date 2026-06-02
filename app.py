@@ -184,6 +184,131 @@ def get_material_name(materials_df, material_id):
     row = target.iloc[0]
     return f'{row["subject"]}｜{row["material_name"]}'
 
+def subject_style(subject):
+    styles = {
+
+        "憲法": {
+            "border": "#ef4444",
+            "bg": "linear-gradient(135deg, #fff1f2, #ffffff)",
+            "badge_bg": "#fee2e2",
+            "badge_text": "#991b1b",
+        },
+
+        "民法": {
+            "border": "#3b82f6",
+            "bg": "linear-gradient(135deg, #eff6ff, #ffffff)",
+            "badge_bg": "#dbeafe",
+            "badge_text": "#1e3a8a",
+        },
+
+        "刑法": {
+            "border": "#22c55e",
+            "bg": "linear-gradient(135deg, #f0fdf4, #ffffff)",
+            "badge_bg": "#dcfce7",
+            "badge_text": "#14532d",
+        },
+
+        "行政法": {
+            "border": "#f59e0b",
+            "bg": "linear-gradient(135deg, #fffbeb, #ffffff)",
+            "badge_bg": "#fef3c7",
+            "badge_text": "#92400e",
+        },
+
+        "商法": {
+            "border": "#8b5cf6",
+            "bg": "linear-gradient(135deg, #f5f3ff, #ffffff)",
+            "badge_bg": "#ede9fe",
+            "badge_text": "#5b21b6",
+        },
+
+        "民事訴訟法": {
+            "border": "#06b6d4",
+            "bg": "linear-gradient(135deg, #ecfeff, #ffffff)",
+            "badge_bg": "#cffafe",
+            "badge_text": "#155e75",
+        },
+
+        "刑事訴訟法": {
+            "border": "#ec4899",
+            "bg": "linear-gradient(135deg, #fdf2f8, #ffffff)",
+            "badge_bg": "#fbcfe8",
+            "badge_text": "#9d174d",
+        },
+
+        "知的財産法": {
+            "border": "#14b8a6",
+            "bg": "linear-gradient(135deg, #f0fdfa, #ffffff)",
+            "badge_bg": "#ccfbf1",
+            "badge_text": "#115e59",
+        },
+
+        "会社法": {
+            "border": "#6366f1",
+            "bg": "linear-gradient(135deg, #eef2ff, #ffffff)",
+            "badge_bg": "#c7d2fe",
+            "badge_text": "#3730a3",
+        },
+
+        "労働法": {
+            "border": "#f97316",
+            "bg": "linear-gradient(135deg, #fff7ed, #ffffff)",
+            "badge_bg": "#fed7aa",
+            "badge_text": "#9a3412",
+        },
+    }
+
+    return styles.get(subject, {
+        "border": "#cbd5e1",
+        "bg": "linear-gradient(135deg, #f8fafc, #ffffff)",
+        "badge_bg": "#f1f5f9",
+        "badge_text": "#334155",
+    })
+
+def subject_color(subject):
+    colors = {
+        "憲法": "#fee2e2",
+        "民法": "#dbeafe",
+        "刑法": "#dcfce7",
+        "行政法": "#fef3c7",
+        "商法": "#f3e8ff",
+        "民事訴訟法": "#e0f2fe",
+        "刑事訴訟法": "#fae8ff",
+    }
+    return colors.get(str(subject), "#f1f5f9")
+
+
+def subject_badge(subject):
+    color = subject_color(subject)
+    return f"""
+    <span style="
+        display:inline-block;
+        padding:0.25rem 0.7rem;
+        border-radius:999px;
+        background:{color};
+        font-weight:800;
+        margin-right:0.35rem;
+        color:#334155;
+    ">
+        {subject}
+    </span>
+    """
+
+def latest_comment_for_question(logs_df, question_id):
+    if logs_df.empty or "question_id" not in logs_df.columns:
+        return ""
+
+    q_logs = logs_df[
+        logs_df["question_id"].astype(str) == str(question_id)
+    ].copy()
+
+    if q_logs.empty:
+        return ""
+
+    q_logs = q_logs.tail(1)
+    comment = safe_str(q_logs.iloc[0].get("comment", ""))
+
+    return comment
 
 def update_question_row(ws, questions_df, question_id, new_values):
     target = questions_df[
@@ -1136,7 +1261,93 @@ st.markdown(
     /* =====================
        タスクタイトル
     ===================== */
+    .subject-task-card {
+        padding: 1rem;
+        border-radius: 22px;
+        margin-bottom: 0.8rem;
+        border-left: 8px solid #cbd5e1;
+        background: rgba(255,255,255,0.85);
+    }
 
+    .subject-badge {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 999px;
+        font-weight: 900;
+        margin-bottom: 0.5rem;
+        color: #334155;
+        background: #f1f5f9;
+    }
+
+    .subject-憲法 {
+        border-left-color: #ef4444;
+        background: linear-gradient(135deg, #fff1f2, #ffffff);
+    }
+
+    .subject-憲法 .subject-badge {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .subject-民法 {
+        border-left-color: #3b82f6;
+        background: linear-gradient(135deg, #eff6ff, #ffffff);
+    }
+
+    .subject-民法 .subject-badge {
+        background: #dbeafe;
+        color: #1e3a8a;
+    }
+
+    .subject-刑法 {
+        border-left-color: #22c55e;
+        background: linear-gradient(135deg, #f0fdf4, #ffffff);
+    }
+
+    .subject-刑法 .subject-badge {
+        background: #dcfce7;
+        color: #14532d;
+    }
+
+    .subject-行政法 {
+        border-left-color: #f59e0b;
+        background: linear-gradient(135deg, #fffbeb, #ffffff);
+    }
+
+    .subject-行政法 .subject-badge {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .subject-商法 {
+        border-left-color: #8b5cf6;
+        background: linear-gradient(135deg, #f5f3ff, #ffffff);
+    }
+
+    .subject-商法 .subject-badge {
+        background: #ede9fe;
+        color: #4c1d95;
+    }
+
+    .subject-民事訴訟法 {
+        border-left-color: #06b6d4;
+        background: linear-gradient(135deg, #ecfeff, #ffffff);
+    }
+
+    .subject-民事訴訟法 .subject-badge {
+        background: #cffafe;
+        color: #155e75;
+    }
+
+    .subject-刑事訴訟法 {
+        border-left-color: #ec4899;
+        background: linear-gradient(135deg, #fdf2f8, #ffffff);
+    }
+
+    .subject-刑事訴訟法 .subject-badge {
+        background: #fce7f3;
+        color: #831843;
+    }
     .card-title {
 
         font-size: 1.45rem;
@@ -1655,15 +1866,85 @@ with tab_today:
                     qnum = int(row["question_number"]) if not pd.isna(row["question_number"]) else ""
 
                     with st.container(border=True):
-                        st.markdown(
-                            f"""
-                            <div class="card-title">{material_label}<br>第{qnum}問</div>
-                            <span class="pill">種類：{task_type}</span>
-                            <span class="pill">タスク：{task_status}</span>
-                            <span class="pill">問題：{question_status}</span>
-                            """,
-                            unsafe_allow_html=True
-                        )
+                        subject_name = safe_str(row.get("subject", ""))
+                        style = subject_style(subject_name)
+
+                        subject_name = safe_str(row.get("subject", ""))
+                        style = subject_style(subject_name)
+
+                        card_html = f"""
+                        <div style="
+                            padding:1rem;
+                            border-radius:22px;
+                            margin-bottom:0.8rem;
+                            border-left:8px solid {style['border']};
+                            background:{style['bg']};
+                            box-shadow:0 14px 32px rgba(15,23,42,0.08);
+                        ">
+                            <div style="
+                                display:inline-block;
+                                padding:0.25rem 0.75rem;
+                                border-radius:999px;
+                                font-weight:900;
+                                margin-bottom:0.5rem;
+                                background:{style['badge_bg']};
+                                color:{style['badge_text']};
+                            ">
+                                {subject_name}
+                            </div>
+
+                            <div style="
+                                font-size:1.35rem;
+                                font-weight:900;
+                                color:#7c2d12;
+                                line-height:1.35;
+                                margin-bottom:0.7rem;
+                            ">
+                                {material_label}<br>第{qnum}問
+                            </div>
+
+                            <span style="
+                                display:inline-block;
+                                padding:0.24rem 0.72rem;
+                                border-radius:999px;
+                                background:#fff1f2;
+                                border:1px solid #fecdd3;
+                                color:#9f1239;
+                                margin-right:0.3rem;
+                                margin-bottom:0.3rem;
+                                font-size:0.85rem;
+                                font-weight:750;
+                            ">種類：{task_type}</span>
+
+                            <span style="
+                                display:inline-block;
+                                padding:0.24rem 0.72rem;
+                                border-radius:999px;
+                                background:#fff1f2;
+                                border:1px solid #fecdd3;
+                                color:#9f1239;
+                                margin-right:0.3rem;
+                                margin-bottom:0.3rem;
+                                font-size:0.85rem;
+                                font-weight:750;
+                            ">タスク：{task_status}</span>
+
+                            <span style="
+                                display:inline-block;
+                                padding:0.24rem 0.72rem;
+                                border-radius:999px;
+                                background:#fff1f2;
+                                border:1px solid #fecdd3;
+                                color:#9f1239;
+                                margin-right:0.3rem;
+                                margin-bottom:0.3rem;
+                                font-size:0.85rem;
+                                font-weight:750;
+                            ">問題：{question_status}</span>
+                        </div>
+                        """
+
+                        st.html(card_html)
 
                         issue = safe_str(row.get("issue", ""))
                         tags = safe_str(row.get("tags", ""))
@@ -1824,13 +2105,58 @@ with tab_today:
                 qnum = int(row["question_number"]) if not pd.isna(row["question_number"]) else ""
 
                 with st.container(border=True):
-                    st.markdown(
-                        f"""
-                        <div class="card-title">{material_label}<br>第{qnum}問</div>
-                        <span class="pill">種類：{group_type}</span>
-                        """,
-                        unsafe_allow_html=True
-                    )
+                    subject_name = safe_str(row.get("subject", ""))
+                    style = subject_style(subject_name)
+
+                    card_html = f"""
+                    <div style="
+                        padding:1rem;
+                        border-radius:22px;
+                        margin-bottom:0.8rem;
+                        border-left:8px solid {style['border']};
+                        background:{style['bg']};
+                        box-shadow:0 14px 32px rgba(15,23,42,0.08);
+                    ">
+                        <div style="
+                            display:inline-block;
+                            padding:0.25rem 0.75rem;
+                            border-radius:999px;
+                            font-weight:900;
+                            margin-bottom:0.5rem;
+                            background:{style['badge_bg']};
+                            color:{style['badge_text']};
+                        ">
+                            {subject_name}
+                        </div>
+
+                        <div style="
+                            font-size:1.35rem;
+                            font-weight:900;
+                            color:#7c2d12;
+                            line-height:1.35;
+                            margin-bottom:0.7rem;
+                        ">
+                            {material_label}<br>第{qnum}問
+                        </div>
+
+                        <span style="
+                            display:inline-block;
+                    　      padding:0.24rem 0.72rem;
+                            border-radius:999px;
+                            background:#fff1f2;
+                            border:1px solid #fecdd3;
+                            color:#9f1239;
+                            margin-right:0.3rem;
+                            margin-bottom:0.3rem;
+                            font-size:0.85rem;
+                            font-weight:750;
+                        ">
+                            種類：{group_type}
+                        </span>
+                    </div>
+                    """
+
+                    st.html(card_html)                                     
 
                     issue = safe_str(row.get("issue", ""))
                     tags = safe_str(row.get("tags", ""))
@@ -2214,6 +2540,9 @@ with tab_questions:
                         f"**第{int(q['question_number'])}問**　{status}　{issue}"
                     )
                     st.caption(history_text)
+                    latest_comment = latest_comment_for_question(logs_df, qid)
+                    if latest_comment:
+                        st.write(f"💬 最新コメント：{latest_comment}")
 
 
 # =====================
