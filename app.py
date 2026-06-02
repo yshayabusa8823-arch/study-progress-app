@@ -1234,74 +1234,62 @@ st.markdown(
 ========================================================= */
 
 .stApp::before {
-
     content:
-        "❄        ✦          ❅        ✧"
-        "      ❆        ⋆          ❄"
-        "   ✧        ❅       ✦        ❆";
+        "✦        ❄          ✧       ✦"
+        "      ✧        ❄          ✦"
+        "   ✦        ✧       ❄        ✦";
 
     position: fixed;
     inset: 0;
-
     pointer-events: none;
     z-index: 0;
-
     white-space: pre-wrap;
 
-    color: rgba(255,255,255,0.96);
+    color: rgba(255,255,255,0.94);
 
     font-size: 30px;
     line-height: 135px;
-    letter-spacing: 32px;
-    padding: 24px 34px;
+    letter-spacing: 34px;
+    padding: 28px 34px;
 
-    opacity: 0.68;
+    opacity: 0.78;
 
     text-shadow:
         0 0 8px rgba(255,255,255,1),
         0 0 18px rgba(255,255,255,0.95),
-        0 0 32px rgba(255,255,255,0.85),
-        0 0 42px rgba(233,236,255,0.65),
-        0 0 58px rgba(245,243,255,0.55);
+        0 0 34px rgba(255,255,255,0.8),
+        0 0 48px rgba(245,243,255,0.55);
 
-    animation:
-        snowFloatStrong 14s ease-in-out infinite alternate;
+    animation: snowFloatStrong 14s ease-in-out infinite alternate;
 }
 
 .stApp::after {
-
     content:
-        "✦     ❄        ✧       ❅       ⋆"
-        "   ❆       ✦       ❄       ✧"
-        "      ❅        ⋆       ❆       ✦";
+        "✧     ✦        ✧       ✦       ⋆"
+        "   ❄       ✦       ✧       ❄"
+        "      ✦        ⋆       ✧       ✦";
 
     position: fixed;
     inset: 0;
-
     pointer-events: none;
     z-index: 0;
-
     white-space: pre-wrap;
 
-    /* ここを超薄水色に */
-
-    color: rgba(240,247,255,0.88);
+    color: rgba(255,255,255,0.86);
 
     font-size: 18px;
     line-height: 95px;
-    letter-spacing: 24px;
+    letter-spacing: 25px;
     padding: 58px 18px;
 
-    opacity: 0.52;
+    opacity: 0.62;
 
     text-shadow:
-        0 0 8px rgba(255,255,255,0.98),
-        0 0 16px rgba(255,255,255,0.92),
-        0 0 26px rgba(238,242,255,0.72),
-        0 0 36px rgba(230,238,255,0.48);
+        0 0 6px rgba(255,255,255,0.95),
+        0 0 14px rgba(255,255,255,0.82),
+        0 0 26px rgba(245,243,255,0.55);
 
-    animation:
-        snowDriftStrong 20s linear infinite;
+    animation: snowDriftStrong 20s linear infinite;
 }
 
 /* =========================================================
