@@ -1211,23 +1211,25 @@ st.markdown(
     <style>
 
     /* =====================
-       全体背景
+       ブルベ夏 × ガラス風
+       低彩度・高明度・青み系
     ===================== */
 
     .stApp {
 
         background:
-            radial-gradient(circle at top left, rgba(196,181,253,0.42) 0%, transparent 30%),
-            radial-gradient(circle at top right, rgba(244,114,182,0.20) 0%, transparent 28%),
-            radial-gradient(circle at bottom left, rgba(167,139,250,0.18) 0%, transparent 25%),
+            radial-gradient(circle at top left, rgba(196,181,253,0.20) 0%, transparent 30%),
+            radial-gradient(circle at top right, rgba(191,219,254,0.18) 0%, transparent 28%),
+            radial-gradient(circle at bottom left, rgba(233,213,255,0.18) 0%, transparent 25%),
 
             linear-gradient(
                 135deg,
-                #faf7ff 0%,
-                #f5f3ff 22%,
-                #fdf4ff 48%,
-                #f3e8ff 72%,
-                #eef2ff 100%
+                #fcfbff 0%,
+                #f8f7ff 18%,
+                #f5f3ff 38%,
+                #f5f7ff 58%,
+                #f8faff 78%,
+                #ffffff 100%
             );
 
         background-attachment: fixed;
@@ -1248,9 +1250,9 @@ st.markdown(
 
     h1 {
 
-        color: #6d28d9 !important;
+        color: #6b5ca5 !important;
 
-        font-size: 2.45rem !important;
+        font-size: 2.4rem !important;
 
         font-weight: 950 !important;
 
@@ -1261,14 +1263,14 @@ st.markdown(
 
     h2, h3 {
 
-        color: #7c3aed !important;
+        color: #7b6ea8 !important;
 
         font-weight: 900 !important;
     }
 
     p, span, label {
 
-        color: #4c1d95;
+        color: #5f6482;
     }
 
     /* =====================
@@ -1277,18 +1279,18 @@ st.markdown(
 
     .stTabs [data-baseweb="tab-list"] {
 
-        background: rgba(255,255,255,0.38);
+        background: rgba(255,255,255,0.34);
 
-        backdrop-filter: blur(20px);
+        backdrop-filter: blur(24px);
 
         border-radius: 999px;
 
         padding: 0.42rem;
 
-        border: 1px solid rgba(255,255,255,0.68);
+        border: 1px solid rgba(255,255,255,0.72);
 
         box-shadow:
-            0 14px 32px rgba(168, 85, 247, 0.14);
+            0 10px 28px rgba(180, 188, 255, 0.10);
 
         gap: 0.35rem;
     }
@@ -1297,9 +1299,9 @@ st.markdown(
 
         border-radius: 999px;
 
-        color: #6d28d9;
+        color: #7b6ea8;
 
-        font-weight: 850;
+        font-weight: 800;
 
         padding: 0.5rem 1rem;
 
@@ -1308,7 +1310,7 @@ st.markdown(
 
     .stTabs [data-baseweb="tab"]:hover {
 
-        background: rgba(243,232,255,0.85);
+        background: rgba(245,243,255,0.72);
     }
 
     .stTabs [aria-selected="true"] {
@@ -1316,15 +1318,15 @@ st.markdown(
         background:
             linear-gradient(
                 135deg,
-                #a855f7,
-                #c084fc,
-                #f472b6
+                #b8b5ff,
+                #d6c6f5,
+                #e6d6f5
             );
 
-        color: white !important;
+        color: #4b5563 !important;
 
         box-shadow:
-            0 12px 28px rgba(168, 85, 247, 0.28);
+            0 10px 24px rgba(196, 181, 253, 0.18);
     }
 
     /* =====================
@@ -1333,21 +1335,21 @@ st.markdown(
 
     div[data-testid="stVerticalBlockBorderWrapper"] {
 
-        background: rgba(255,255,255,0.36);
+        background: rgba(255,255,255,0.30);
 
-        backdrop-filter: blur(24px);
+        backdrop-filter: blur(26px);
 
         border-radius: 34px;
 
-        border: 1px solid rgba(255,255,255,0.62);
+        border: 1px solid rgba(255,255,255,0.72);
 
         padding: 0.9rem !important;
 
         margin-bottom: 1rem;
 
         box-shadow:
-            0 18px 40px rgba(168, 85, 247, 0.12),
-            0 8px 22px rgba(244, 114, 182, 0.08);
+            0 16px 36px rgba(196, 181, 253, 0.08),
+            0 6px 18px rgba(191, 219, 254, 0.06);
     }
 
     /* =====================
@@ -1356,18 +1358,18 @@ st.markdown(
 
     div[data-testid="stMetric"] {
 
-        background: rgba(255,255,255,0.34);
+        background: rgba(255,255,255,0.26);
 
-        backdrop-filter: blur(18px);
+        backdrop-filter: blur(20px);
 
         border-radius: 30px;
 
-        border: 1px solid rgba(255,255,255,0.7);
+        border: 1px solid rgba(255,255,255,0.76);
 
         padding: 1rem;
 
         box-shadow:
-            0 14px 32px rgba(192, 132, 252, 0.16);
+            0 10px 26px rgba(196, 181, 253, 0.10);
     }
 
     /* =====================
@@ -1380,23 +1382,23 @@ st.markdown(
         background:
             linear-gradient(
                 135deg,
-                #9333ea,
-                #c084fc,
-                #f472b6
+                #b8b5ff,
+                #cfc8f3,
+                #dfe7ff
             ) !important;
 
         border: none !important;
 
         border-radius: 999px !important;
 
-        color: white !important;
+        color: #4b5563 !important;
 
-        font-weight: 900 !important;
+        font-weight: 850 !important;
 
         padding: 0.66rem 1rem !important;
 
         box-shadow:
-            0 12px 28px rgba(168, 85, 247, 0.24);
+            0 10px 24px rgba(196, 181, 253, 0.16);
 
         transition: all 0.16s ease;
     }
@@ -1404,10 +1406,10 @@ st.markdown(
     .stButton > button:hover,
     button[kind="primary"]:hover {
 
-        transform: translateY(-2px) scale(1.02);
+        transform: translateY(-2px);
 
         box-shadow:
-            0 16px 34px rgba(168, 85, 247, 0.34);
+            0 14px 30px rgba(196, 181, 253, 0.20);
     }
 
     /* =====================
@@ -1419,23 +1421,23 @@ st.markdown(
         background:
             linear-gradient(
                 135deg,
-                rgba(255,255,255,0.42),
-                rgba(245,243,255,0.34),
-                rgba(253,244,255,0.28)
+                rgba(255,255,255,0.34),
+                rgba(245,243,255,0.26),
+                rgba(239,246,255,0.24)
             );
 
-        backdrop-filter: blur(22px);
+        backdrop-filter: blur(24px);
 
         border-radius: 32px;
 
         padding: 1rem 1.05rem;
 
-        border: 1px solid rgba(255,255,255,0.7);
+        border: 1px solid rgba(255,255,255,0.76);
 
         box-shadow:
-            0 14px 30px rgba(168, 85, 247, 0.12);
+            0 12px 28px rgba(196, 181, 253, 0.08);
 
-        color: #4c1d95;
+        color: #5f6482;
 
         margin-bottom: 1rem;
     }
@@ -1444,16 +1446,16 @@ st.markdown(
 
         font-size: 1rem;
 
-        font-weight: 950;
+        font-weight: 900;
 
-        color: #7c3aed;
+        color: #7b6ea8;
 
         margin-bottom: 0.2rem;
     }
 
     .sub-card-text {
 
-        color: #5b21b6;
+        color: #5f6482;
 
         font-weight: 700;
     }
@@ -1467,11 +1469,11 @@ st.markdown(
         background:
             linear-gradient(
                 135deg,
-                rgba(255,255,255,0.48),
-                rgba(243,232,255,0.28)
+                rgba(255,255,255,0.38),
+                rgba(245,243,255,0.22)
             );
 
-        backdrop-filter: blur(18px);
+        backdrop-filter: blur(20px);
 
         border-radius: 30px;
 
@@ -1479,10 +1481,10 @@ st.markdown(
 
         margin-bottom: 0.8rem;
 
-        border-left: 8px solid #c084fc;
+        border-left: 8px solid #c7c3f7;
 
         box-shadow:
-            0 14px 32px rgba(168, 85, 247, 0.14);
+            0 12px 28px rgba(196, 181, 253, 0.08);
     }
 
     /* =====================
@@ -1494,12 +1496,12 @@ st.markdown(
         background:
             linear-gradient(
                 135deg,
-                #ede9fe,
-                #f5d0fe,
-                #fbcfe8
+                #f1efff,
+                #f6f2ff,
+                #eef4ff
             );
 
-        color: #6d28d9;
+        color: #6b5ca5;
 
         border-radius: 24px;
 
@@ -1512,7 +1514,7 @@ st.markdown(
         margin-bottom: 0.75rem;
 
         box-shadow:
-            0 10px 24px rgba(192, 132, 252, 0.18);
+            0 8px 20px rgba(196, 181, 253, 0.10);
     }
 
     /* =====================
@@ -1530,15 +1532,15 @@ st.markdown(
         background:
             linear-gradient(
                 135deg,
-                #f3e8ff,
-                #fce7f3
+                #f3f0ff,
+                #eef4ff
             );
 
-        color: #7c3aed;
+        color: #7b6ea8;
 
-        font-weight: 850;
+        font-weight: 800;
 
-        border: 1px solid rgba(255,255,255,0.72);
+        border: 1px solid rgba(255,255,255,0.76);
 
         margin-right: 0.35rem;
 
@@ -1551,18 +1553,18 @@ st.markdown(
 
     div[data-testid="stExpander"] {
 
-        background: rgba(255,255,255,0.32);
+        background: rgba(255,255,255,0.24);
 
-        backdrop-filter: blur(18px);
+        backdrop-filter: blur(20px);
 
         border-radius: 26px;
 
-        border: 1px solid rgba(255,255,255,0.68);
+        border: 1px solid rgba(255,255,255,0.76);
 
         overflow: hidden;
 
         box-shadow:
-            0 10px 24px rgba(168, 85, 247, 0.10);
+            0 8px 20px rgba(196, 181, 253, 0.08);
 
         margin-top: 0.7rem;
 
@@ -1578,18 +1580,18 @@ st.markdown(
 
         border-radius: 18px !important;
 
-        border: 1px solid #ddd6fe !important;
+        border: 1px solid #e5e7ff !important;
 
-        background: rgba(255,255,255,0.62) !important;
+        background: rgba(255,255,255,0.48) !important;
     }
 
     div[data-baseweb="select"] > div {
 
         border-radius: 18px !important;
 
-        border-color: #ddd6fe !important;
+        border-color: #e5e7ff !important;
 
-        background: rgba(255,255,255,0.55) !important;
+        background: rgba(255,255,255,0.42) !important;
     }
 
     /* =====================
@@ -1601,9 +1603,9 @@ st.markdown(
         background:
             linear-gradient(
                 135deg,
-                #9333ea,
-                #c084fc,
-                #f472b6
+                #b8b5ff,
+                #d6c6f5,
+                #dbeafe
             );
     }
 
@@ -1621,7 +1623,7 @@ st.markdown(
             linear-gradient(
                 90deg,
                 transparent,
-                #d8b4fe,
+                #ddd6fe,
                 transparent
             );
 
@@ -1641,8 +1643,8 @@ st.markdown(
         background:
             linear-gradient(
                 180deg,
-                #a855f7,
-                #f472b6
+                #c4b5fd,
+                #dbeafe
             );
 
         border-radius: 999px;
