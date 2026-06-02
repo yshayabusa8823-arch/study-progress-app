@@ -1226,76 +1226,188 @@ st.markdown(
         background-attachment: fixed;
     }
 
-    .stApp::before {
-        content: "";
-        position: fixed;
-        inset: 0;
-        pointer-events: none;
-        z-index: 0;
-        opacity: 0.55;
+    /* =========================================================
+   キラキラ部分を雪の結晶系に変更
+   （今の .stApp::before と ::after を置き換え）
+========================================================= */
 
-        background-image:
-            radial-gradient(circle at 8% 12%, rgba(255,255,255,0.95) 0px, rgba(255,255,255,0.95) 2px, transparent 3px),
-            radial-gradient(circle at 22% 18%, rgba(255,255,255,0.8) 0px, rgba(255,255,255,0.8) 1.5px, transparent 2.5px),
-            radial-gradient(circle at 38% 10%, rgba(255,255,255,0.95) 0px, rgba(255,255,255,0.95) 2.2px, transparent 3px),
-            radial-gradient(circle at 52% 16%, rgba(216,180,254,0.9) 0px, rgba(216,180,254,0.9) 2px, transparent 3px),
-            radial-gradient(circle at 70% 9%, rgba(255,255,255,0.95) 0px, rgba(255,255,255,0.95) 2px, transparent 3px),
-            radial-gradient(circle at 88% 14%, rgba(191,219,254,0.95) 0px, rgba(191,219,254,0.95) 2px, transparent 3px),
-            radial-gradient(circle at 12% 42%, rgba(255,255,255,0.85) 0px, rgba(255,255,255,0.85) 1.8px, transparent 2.8px),
-            radial-gradient(circle at 30% 38%, rgba(255,255,255,0.95) 0px, rgba(255,255,255,0.95) 2px, transparent 3px),
-            radial-gradient(circle at 46% 48%, rgba(216,180,254,0.9) 0px, rgba(216,180,254,0.9) 2px, transparent 3px),
-            radial-gradient(circle at 64% 36%, rgba(255,255,255,0.9) 0px, rgba(255,255,255,0.9) 2px, transparent 3px),
-            radial-gradient(circle at 82% 44%, rgba(255,255,255,0.95) 0px, rgba(255,255,255,0.95) 2.2px, transparent 3px),
-            radial-gradient(circle at 92% 34%, rgba(191,219,254,0.95) 0px, rgba(191,219,254,0.95) 2px, transparent 3px),
-            radial-gradient(circle at 18% 72%, rgba(255,255,255,0.95) 0px, rgba(255,255,255,0.95) 2px, transparent 3px),
-            radial-gradient(circle at 38% 82%, rgba(216,180,254,0.85) 0px, rgba(216,180,254,0.85) 2px, transparent 3px),
-            radial-gradient(circle at 56% 74%, rgba(255,255,255,0.9) 0px, rgba(255,255,255,0.9) 2px, transparent 3px),
-            radial-gradient(circle at 74% 84%, rgba(255,255,255,0.95) 0px, rgba(255,255,255,0.95) 2px, transparent 3px),
-            radial-gradient(circle at 90% 76%, rgba(191,219,254,0.95) 0px, rgba(191,219,254,0.95) 2px, transparent 3px);
+.stApp::before {
 
-        animation: sparkleMove 18s ease-in-out infinite alternate;
+    content:
+        "❄        ❅             ❄"
+        "      ✧         ❅";
+
+    position: fixed;
+
+    inset: 0;
+
+    pointer-events: none;
+
+    z-index: 0;
+
+    white-space: pre-wrap;
+
+    color: rgba(255,255,255,0.82);
+
+    font-size: 22px;
+
+    line-height: 150px;
+
+    letter-spacing: 34px;
+
+    padding: 30px;
+
+    opacity: 0.38;
+
+    text-shadow:
+        0 0 10px rgba(255,255,255,0.95),
+        0 0 18px rgba(255,255,255,0.75),
+        0 0 28px rgba(191,219,254,0.55);
+
+    animation:
+        snowFloat 18s ease-in-out infinite alternate;
+}
+
+/* 小さい雪 */
+
+.stApp::after {
+
+    content: "";
+
+    position: fixed;
+
+    inset: 0;
+
+    pointer-events: none;
+
+    z-index: 0;
+
+    opacity: 0.30;
+
+    background-image:
+
+        radial-gradient(circle at 8% 12%,
+            rgba(255,255,255,0.95) 0px,
+            rgba(255,255,255,0.95) 1.4px,
+            transparent 2.4px),
+
+        radial-gradient(circle at 22% 18%,
+            rgba(255,255,255,0.75) 0px,
+            rgba(255,255,255,0.75) 1.1px,
+            transparent 2px),
+
+        radial-gradient(circle at 38% 10%,
+            rgba(191,219,254,0.95) 0px,
+            rgba(191,219,254,0.95) 1.6px,
+            transparent 2.5px),
+
+        radial-gradient(circle at 52% 16%,
+            rgba(216,180,254,0.9) 0px,
+            rgba(216,180,254,0.9) 1.5px,
+            transparent 2.5px),
+
+        radial-gradient(circle at 70% 9%,
+            rgba(255,255,255,0.95) 0px,
+            rgba(255,255,255,0.95) 1.5px,
+            transparent 2.5px),
+
+        radial-gradient(circle at 88% 14%,
+            rgba(191,219,254,0.95) 0px,
+            rgba(191,219,254,0.95) 1.5px,
+            transparent 2.5px),
+
+        radial-gradient(circle at 12% 42%,
+            rgba(255,255,255,0.85) 0px,
+            rgba(255,255,255,0.85) 1.2px,
+            transparent 2px),
+
+        radial-gradient(circle at 30% 38%,
+            rgba(255,255,255,0.95) 0px,
+            rgba(255,255,255,0.95) 1.5px,
+            transparent 2.5px),
+
+        radial-gradient(circle at 46% 48%,
+            rgba(216,180,254,0.9) 0px,
+            rgba(216,180,254,0.9) 1.5px,
+            transparent 2.5px),
+
+        radial-gradient(circle at 64% 36%,
+            rgba(255,255,255,0.9) 0px,
+            rgba(255,255,255,0.9) 1.5px,
+            transparent 2.5px),
+
+        radial-gradient(circle at 82% 44%,
+            rgba(255,255,255,0.95) 0px,
+            rgba(255,255,255,0.95) 1.6px,
+            transparent 2.5px),
+
+        radial-gradient(circle at 92% 34%,
+            rgba(191,219,254,0.95) 0px,
+            rgba(191,219,254,0.95) 1.5px,
+            transparent 2.5px),
+
+        radial-gradient(circle at 18% 72%,
+            rgba(255,255,255,0.95) 0px,
+            rgba(255,255,255,0.95) 1.5px,
+            transparent 2.5px),
+
+        radial-gradient(circle at 38% 82%,
+            rgba(216,180,254,0.85) 0px,
+            rgba(216,180,254,0.85) 1.5px,
+            transparent 2.5px),
+
+        radial-gradient(circle at 56% 74%,
+            rgba(255,255,255,0.9) 0px,
+            rgba(255,255,255,0.9) 1.5px,
+            transparent 2.5px),
+
+        radial-gradient(circle at 74% 84%,
+            rgba(255,255,255,0.95) 0px,
+            rgba(255,255,255,0.95) 1.5px,
+            transparent 2.5px),
+
+        radial-gradient(circle at 90% 76%,
+            rgba(191,219,254,0.95) 0px,
+            rgba(191,219,254,0.95) 1.5px,
+            transparent 2.5px);
+
+    animation:
+        snowMove 22s linear infinite;
+}
+
+/* ふわふわ動く */
+
+@keyframes snowFloat {
+
+    0% {
+
+        transform:
+            translateY(0px)
+            translateX(0px);
     }
 
-    .stApp::after {
-        content:
-            "✦        ✧             ✦"
-            "      ⋆         ✦";
-        position: fixed;
-        inset: 0;
-        pointer-events: none;
-        z-index: 0;
-        white-space: pre-wrap;
-        color: rgba(255,255,255,0.82);
-        font-size: 26px;
-        line-height: 180px;
-        letter-spacing: 38px;
-        padding: 40px;
-        opacity: 0.42;
-        text-shadow:
-            0 0 10px rgba(255,255,255,0.95),
-            0 0 22px rgba(255,255,255,0.7),
-            0 0 34px rgba(196,181,253,0.55);
-        animation: sparkleFloat 12s ease-in-out infinite alternate;
+    100% {
+
+        transform:
+            translateY(-16px)
+            translateX(10px);
+    }
+}
+
+@keyframes snowMove {
+
+    0% {
+
+        transform:
+            translateY(0px);
     }
 
-    @keyframes sparkleMove {
-        0% {
-            transform: translateY(0px) translateX(0px);
-        }
-        100% {
-            transform: translateY(-10px) translateX(8px);
-        }
-    }
+    100% {
 
-    @keyframes sparkleFloat {
-        0% {
-            transform: translateY(0px);
-        }
-        100% {
-            transform: translateY(-14px);
-        }
+        transform:
+            translateY(18px);
     }
-
+}
     .block-container {
         max-width: 900px;
         padding-top: 1.5rem;
