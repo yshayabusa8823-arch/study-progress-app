@@ -1210,344 +1210,438 @@ st.markdown(
     """
     <style>
 
+    /* =====================
+       全体背景
+    ===================== */
+
     .stApp {
+
         background:
-            radial-gradient(circle at top left, #ffd6e8 0, transparent 32%),
-            radial-gradient(circle at top right, #dbeafe 0, transparent 30%),
-            radial-gradient(circle at bottom left, #fef3c7 0, transparent 28%),
-            linear-gradient(135deg, #fff1f7 0%, #fff7ed 38%, #fef9ff 68%, #eefcff 100%);
+            radial-gradient(circle at top left, rgba(255,183,197,0.55) 0%, transparent 30%),
+            radial-gradient(circle at top right, rgba(255,220,180,0.45) 0%, transparent 28%),
+            radial-gradient(circle at bottom left, rgba(255,200,160,0.35) 0%, transparent 25%),
+
+            linear-gradient(
+                135deg,
+                #fff4f6 0%,
+                #ffe8df 22%,
+                #fff1d6 48%,
+                #ffe3cf 72%,
+                #fff7f1 100%
+            );
+
         background-attachment: fixed;
     }
 
     .block-container {
-        padding-top: 1.4rem;
-        padding-bottom: 3rem;
         max-width: 860px;
+        padding-top: 1.5rem;
+        padding-bottom: 3rem;
     }
 
+    /* =====================
+       タイトル
+    ===================== */
+
     h1 {
-        font-size: 2.35rem !important;
-        line-height: 1.1 !important;
-        margin-bottom: 0.3rem !important;
+
         color: #9f1239 !important;
-        letter-spacing: -0.04em;
+
+        font-size: 2.4rem !important;
+
         font-weight: 950 !important;
+
+        letter-spacing: -0.04em;
+
+        margin-bottom: 0.25rem !important;
     }
 
     h2, h3 {
+
         color: #9f1239 !important;
+
         font-weight: 900 !important;
     }
 
     p, span, label {
-        color: #5b2938;
+
+        color: #6b2d2d;
     }
 
+    /* =====================
+       タブ
+    ===================== */
+
     .stTabs [data-baseweb="tab-list"] {
-        gap: 0.35rem;
-        overflow-x: auto;
-        white-space: nowrap;
-        background: rgba(255,255,255,0.55);
-        backdrop-filter: blur(16px);
-        padding: 0.42rem;
+
+        background: rgba(255,255,255,0.42);
+
+        backdrop-filter: blur(18px);
+
         border-radius: 999px;
-        border: 1px solid rgba(255,255,255,0.75);
-        box-shadow: 0 10px 28px rgba(255, 143, 177, 0.16);
+
+        padding: 0.42rem;
+
+        border: 1px solid rgba(255,255,255,0.65);
+
+        box-shadow:
+            0 12px 30px rgba(255, 160, 122, 0.18);
+
+        gap: 0.35rem;
     }
 
     .stTabs [data-baseweb="tab"] {
-        font-size: 0.95rem;
-        padding: 0.5rem 0.95rem;
+
         border-radius: 999px;
+
         color: #9f1239;
-        font-weight: 800;
+
+        font-weight: 850;
+
+        padding: 0.5rem 1rem;
+
         transition: all 0.16s ease;
     }
 
     .stTabs [data-baseweb="tab"]:hover {
-        background: rgba(255, 241, 247, 0.9);
+
+        background: rgba(255,240,235,0.8);
     }
 
     .stTabs [aria-selected="true"] {
-        background: linear-gradient(135deg, #ff8fb1, #ffc58f);
+
+        background:
+            linear-gradient(
+                135deg,
+                #ff8a9e,
+                #ffb38a,
+                #ffd36e
+            );
+
         color: white !important;
-        font-weight: 900;
-        box-shadow: 0 8px 20px rgba(255, 143, 177, 0.32);
+
+        box-shadow:
+            0 10px 24px rgba(255, 179, 138, 0.35);
     }
 
-    div[data-testid="stMetric"] {
-        background: rgba(255, 255, 255, 0.72);
-        backdrop-filter: blur(16px);
-        border: 1px solid rgba(255,255,255,0.75);
-        padding: 1rem;
-        border-radius: 28px;
-        box-shadow:
-            0 14px 34px rgba(255, 143, 177, 0.16),
-            0 4px 12px rgba(0,0,0,0.04);
-    }
+    /* =====================
+       カード
+    ===================== */
 
     div[data-testid="stVerticalBlockBorderWrapper"] {
-        background: rgba(255, 255, 255, 0.72);
-        backdrop-filter: blur(16px);
-        border-radius: 30px;
-        border: 1px solid rgba(255,255,255,0.75);
-        box-shadow:
-            0 14px 34px rgba(255, 143, 177, 0.15),
-            0 4px 12px rgba(0,0,0,0.04);
-        padding: 0.8rem !important;
+
+        background: rgba(255,255,255,0.48);
+
+        backdrop-filter: blur(20px);
+
+        border-radius: 32px;
+
+        border: 1px solid rgba(255,255,255,0.65);
+
+        padding: 0.85rem !important;
+
         margin-bottom: 1rem;
+
+        box-shadow:
+            0 18px 40px rgba(255, 183, 197, 0.18),
+            0 8px 20px rgba(255, 200, 160, 0.10);
     }
+
+    /* =====================
+       Metric
+    ===================== */
+
+    div[data-testid="stMetric"] {
+
+        background: rgba(255,255,255,0.45);
+
+        backdrop-filter: blur(16px);
+
+        border-radius: 28px;
+
+        border: 1px solid rgba(255,255,255,0.7);
+
+        padding: 1rem;
+
+        box-shadow:
+            0 14px 34px rgba(255, 183, 197, 0.16);
+    }
+
+    /* =====================
+       ボタン
+    ===================== */
 
     .stButton > button,
     button[kind="primary"] {
-        background: linear-gradient(135deg, #ff8fb1, #ffb38a) !important;
+
+        background:
+            linear-gradient(
+                135deg,
+                #ff8fa8,
+                #ffb085,
+                #ffd36e
+            ) !important;
+
         border: none !important;
+
         border-radius: 999px !important;
+
         color: white !important;
-        font-weight: 850 !important;
-        padding: 0.62rem 1rem !important;
-        box-shadow: 0 9px 22px rgba(255, 143, 177, 0.28);
+
+        font-weight: 900 !important;
+
+        padding: 0.65rem 1rem !important;
+
+        box-shadow:
+            0 10px 24px rgba(255, 176, 133, 0.28);
+
         transition: all 0.16s ease;
     }
 
     .stButton > button:hover,
     button[kind="primary"]:hover {
-        transform: translateY(-2px) scale(1.015);
-        box-shadow: 0 13px 28px rgba(255, 143, 177, 0.38);
+
+        transform: translateY(-2px) scale(1.02);
+
+        box-shadow:
+            0 14px 32px rgba(255, 176, 133, 0.4);
     }
 
-    .stButton > button:active,
-    button[kind="primary"]:active {
-        transform: translateY(0px) scale(0.99);
-    }
-
-    .subject-task-card {
-        padding: 1rem;
-        border-radius: 24px;
-        margin-bottom: 0.85rem;
-        border-left: 8px solid #f9a8d4;
-        background: rgba(255,255,255,0.78);
-        box-shadow: 0 12px 28px rgba(255, 143, 177, 0.13);
-    }
-
-    .subject-badge {
-        display: inline-block;
-        padding: 0.27rem 0.8rem;
-        border-radius: 999px;
-        font-weight: 950;
-        margin-bottom: 0.55rem;
-        color: #9f1239;
-        background: #ffe4ef;
-    }
-
-    .subject-憲法 {
-        border-left-color: #fb7185;
-        background: linear-gradient(135deg, #fff1f5, #ffffff);
-    }
-
-    .subject-憲法 .subject-badge {
-        background: #ffe4e6;
-        color: #be123c;
-    }
-
-    .subject-民法 {
-        border-left-color: #60a5fa;
-        background: linear-gradient(135deg, #eff6ff, #ffffff);
-    }
-
-    .subject-民法 .subject-badge {
-        background: #dbeafe;
-        color: #1d4ed8;
-    }
-
-    .subject-刑法 {
-        border-left-color: #34d399;
-        background: linear-gradient(135deg, #ecfdf5, #ffffff);
-    }
-
-    .subject-刑法 .subject-badge {
-        background: #d1fae5;
-        color: #047857;
-    }
-
-    .subject-行政法 {
-        border-left-color: #fbbf24;
-        background: linear-gradient(135deg, #fffbeb, #ffffff);
-    }
-
-    .subject-行政法 .subject-badge {
-        background: #fef3c7;
-        color: #b45309;
-    }
-
-    .subject-商法 {
-        border-left-color: #a78bfa;
-        background: linear-gradient(135deg, #f5f3ff, #ffffff);
-    }
-
-    .subject-商法 .subject-badge {
-        background: #ede9fe;
-        color: #6d28d9;
-    }
-
-    .subject-民事訴訟法 {
-        border-left-color: #22d3ee;
-        background: linear-gradient(135deg, #ecfeff, #ffffff);
-    }
-
-    .subject-民事訴訟法 .subject-badge {
-        background: #cffafe;
-        color: #0e7490;
-    }
-
-    .subject-刑事訴訟法 {
-        border-left-color: #f472b6;
-        background: linear-gradient(135deg, #fdf2f8, #ffffff);
-    }
-
-    .subject-刑事訴訟法 .subject-badge {
-        background: #fce7f3;
-        color: #be185d;
-    }
-
-    .subject-知的財産法 {
-        border-left-color: #2dd4bf;
-        background: linear-gradient(135deg, #f0fdfa, #ffffff);
-    }
-
-    .subject-知的財産法 .subject-badge {
-        background: #ccfbf1;
-        color: #0f766e;
-    }
-
-    .subject-会社法 {
-        border-left-color: #818cf8;
-        background: linear-gradient(135deg, #eef2ff, #ffffff);
-    }
-
-    .subject-会社法 .subject-badge {
-        background: #e0e7ff;
-        color: #4338ca;
-    }
-
-    .subject-労働法 {
-        border-left-color: #fb923c;
-        background: linear-gradient(135deg, #fff7ed, #ffffff);
-    }
-
-    .subject-労働法 .subject-badge {
-        background: #fed7aa;
-        color: #c2410c;
-    }
-
-    .card-title {
-        font-size: 1.45rem;
-        font-weight: 950;
-        margin-bottom: 0.6rem;
-        color: #9f1239;
-        line-height: 1.35;
-    }
-
-    .pill {
-        display: inline-block;
-        padding: 0.26rem 0.75rem;
-        border-radius: 999px;
-        background: rgba(255, 241, 247, 0.95);
-        border: 1px solid #fbcfe8;
-        color: #be185d;
-        margin-right: 0.32rem;
-        margin-bottom: 0.32rem;
-        font-size: 0.86rem;
-        font-weight: 800;
-    }
-
-    .group-title {
-        font-size: 1.08rem;
-        font-weight: 950;
-        margin-top: 1.25rem;
-        margin-bottom: 0.75rem;
-        padding: 0.7rem 1rem;
-        background: linear-gradient(135deg, #ffe4ef, #fff7cc);
-        color: #be123c;
-        border: 1px solid rgba(255,255,255,0.8);
-        border-radius: 22px;
-        box-shadow: 0 9px 22px rgba(255, 143, 177, 0.16);
-    }
+    /* =====================
+       サブカード
+    ===================== */
 
     .sub-card {
-        margin-top: 0.8rem;
-        margin-bottom: 1rem;
-        padding: 1rem 1.05rem;
-        border-radius: 28px;
+
         background:
             linear-gradient(
                 135deg,
-                rgba(255, 241, 247, 0.9),
-                rgba(255, 247, 237, 0.88)
+                rgba(255,245,247,0.82),
+                rgba(255,237,224,0.78),
+                rgba(255,248,220,0.74)
             );
-        border: 1px solid rgba(255,255,255,0.8);
+
+        backdrop-filter: blur(18px);
+
+        border-radius: 30px;
+
+        padding: 1rem 1.05rem;
+
+        border: 1px solid rgba(255,255,255,0.7);
+
         box-shadow:
-            0 13px 30px rgba(255, 143, 177, 0.15),
-            0 4px 12px rgba(0,0,0,0.035);
-        color: #9f1239;
-        backdrop-filter: blur(16px);
+            0 14px 30px rgba(255, 183, 197, 0.14);
+
+        color: #7c2d12;
+
+        margin-bottom: 1rem;
     }
 
     .sub-card-title {
+
         font-size: 1rem;
+
         font-weight: 950;
-        margin-bottom: 0.18rem;
+
         color: #9f1239;
+
+        margin-bottom: 0.2rem;
     }
 
     .sub-card-text {
-        font-size: 0.93rem;
+
         color: #7c2d12;
+
         font-weight: 700;
     }
 
-    div[data-testid="stExpander"] {
+    /* =====================
+       タスクカード
+    ===================== */
+
+    .subject-task-card {
+
+        background:
+            linear-gradient(
+                135deg,
+                rgba(255,255,255,0.72),
+                rgba(255,245,240,0.6)
+            );
+
+        backdrop-filter: blur(16px);
+
+        border-radius: 28px;
+
+        padding: 1rem;
+
+        margin-bottom: 0.8rem;
+
+        border-left: 8px solid #ffb085;
+
+        box-shadow:
+            0 14px 32px rgba(255, 183, 197, 0.14);
+    }
+
+    /* =====================
+       グループタイトル
+    ===================== */
+
+    .group-title {
+
+        background:
+            linear-gradient(
+                135deg,
+                #ffe0e9,
+                #ffe7d1,
+                #fff0b8
+            );
+
+        color: #9f1239;
+
         border-radius: 22px;
-        border: 1px solid rgba(255,255,255,0.75);
-        background: rgba(255, 251, 235, 0.72);
-        backdrop-filter: blur(14px);
-        margin-top: 0.75rem;
+
+        padding: 0.7rem 1rem;
+
+        font-weight: 950;
+
+        margin-top: 1.2rem;
+
         margin-bottom: 0.75rem;
+
+        box-shadow:
+            0 10px 24px rgba(255, 183, 197, 0.16);
+    }
+
+    /* =====================
+       ピル
+    ===================== */
+
+    .pill {
+
+        display: inline-block;
+
+        padding: 0.26rem 0.78rem;
+
+        border-radius: 999px;
+
+        background:
+            linear-gradient(
+                135deg,
+                #ffe0e9,
+                #fff0c7
+            );
+
+        color: #9f1239;
+
+        font-weight: 800;
+
+        border: 1px solid rgba(255,255,255,0.7);
+
+        margin-right: 0.35rem;
+
+        margin-bottom: 0.35rem;
+    }
+
+    /* =====================
+       Expander
+    ===================== */
+
+    div[data-testid="stExpander"] {
+
+        background: rgba(255,255,255,0.42);
+
+        backdrop-filter: blur(16px);
+
+        border-radius: 24px;
+
+        border: 1px solid rgba(255,255,255,0.72);
+
         overflow: hidden;
-        box-shadow: 0 8px 18px rgba(251, 191, 36, 0.08);
+
+        box-shadow:
+            0 10px 24px rgba(255, 200, 160, 0.12);
+
+        margin-top: 0.7rem;
+
+        margin-bottom: 0.7rem;
     }
 
-    .stAlert {
-        border-radius: 22px;
-    }
+    /* =====================
+       Input
+    ===================== */
 
-    input, textarea {
+    input,
+    textarea {
+
         border-radius: 16px !important;
-        border: 1px solid #fbcfe8 !important;
+
+        border: 1px solid #ffd2c7 !important;
+
+        background: rgba(255,255,255,0.75) !important;
     }
 
     div[data-baseweb="select"] > div {
+
         border-radius: 16px !important;
-        border-color: #fbcfe8 !important;
+
+        border-color: #ffd2c7 !important;
+
+        background: rgba(255,255,255,0.72) !important;
     }
+
+    /* =====================
+       プログレスバー
+    ===================== */
 
     div[data-testid="stProgress"] > div > div > div {
-        background: linear-gradient(135deg, #ff8fb1, #ffc58f);
+
+        background:
+            linear-gradient(
+                135deg,
+                #ff8fa8,
+                #ffb085,
+                #ffd36e
+            );
     }
 
+    /* =====================
+       区切り線
+    ===================== */
+
     hr {
+
         border: none;
+
         height: 1px;
-        background: linear-gradient(90deg, transparent, #fbcfe8, transparent);
-        margin: 1.4rem 0;
+
+        background:
+            linear-gradient(
+                90deg,
+                transparent,
+                #ffc9b8,
+                transparent
+            );
+
+        margin: 1.5rem 0;
     }
+
+    /* =====================
+       スクロールバー
+    ===================== */
 
     ::-webkit-scrollbar {
         width: 10px;
     }
 
     ::-webkit-scrollbar-thumb {
-        background: linear-gradient(180deg, #ff8fb1, #ffc58f);
+
+        background:
+            linear-gradient(
+                180deg,
+                #ff9fb2,
+                #ffbf94
+            );
+
         border-radius: 999px;
     }
 
