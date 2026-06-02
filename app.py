@@ -1214,25 +1214,29 @@ st.markdown(
        ブルベ夏 × 高級感 × ガラス風
        黒文字強化版
     ===================== */
+    /* =====================
+   背景を少し濃く
+   （ここだけ差し替え）
+===================== */
 
-    .stApp {
+.stApp {
 
-        background:
-            radial-gradient(circle at top left, rgba(196,181,253,0.16) 0%, transparent 28%),
-            radial-gradient(circle at top right, rgba(191,219,254,0.14) 0%, transparent 24%),
-            radial-gradient(circle at bottom left, rgba(233,213,255,0.10) 0%, transparent 22%),
+    background:
+        radial-gradient(circle at top left, rgba(167,139,250,0.22) 0%, transparent 30%),
+        radial-gradient(circle at top right, rgba(147,197,253,0.18) 0%, transparent 26%),
+        radial-gradient(circle at bottom left, rgba(216,180,254,0.14) 0%, transparent 24%),
 
-            linear-gradient(
-                135deg,
-                #fcfbff 0%,
-                #f7f5ff 20%,
-                #f4f4ff 40%,
-                #f6f8ff 62%,
-                #fbfcff 100%
-            );
+        linear-gradient(
+            135deg,
+            #f3f0ff 0%,
+            #ece8ff 22%,
+            #e8e9ff 42%,
+            #eef2ff 65%,
+            #f5f7ff 100%
+        );
 
-        background-attachment: fixed;
-    }
+    background-attachment: fixed;
+}
 
     .block-container {
 
