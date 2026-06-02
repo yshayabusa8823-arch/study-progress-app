@@ -1217,25 +1217,28 @@ st.markdown(
     .stApp {
 
         background:
-            radial-gradient(circle at top left, rgba(255,183,197,0.55) 0%, transparent 30%),
-            radial-gradient(circle at top right, rgba(255,220,180,0.45) 0%, transparent 28%),
-            radial-gradient(circle at bottom left, rgba(255,200,160,0.35) 0%, transparent 25%),
+            radial-gradient(circle at top left, rgba(196,181,253,0.42) 0%, transparent 30%),
+            radial-gradient(circle at top right, rgba(244,114,182,0.20) 0%, transparent 28%),
+            radial-gradient(circle at bottom left, rgba(167,139,250,0.18) 0%, transparent 25%),
 
             linear-gradient(
                 135deg,
-                #fff4f6 0%,
-                #ffe8df 22%,
-                #fff1d6 48%,
-                #ffe3cf 72%,
-                #fff7f1 100%
+                #faf7ff 0%,
+                #f5f3ff 22%,
+                #fdf4ff 48%,
+                #f3e8ff 72%,
+                #eef2ff 100%
             );
 
         background-attachment: fixed;
     }
 
     .block-container {
+
         max-width: 860px;
+
         padding-top: 1.5rem;
+
         padding-bottom: 3rem;
     }
 
@@ -1245,9 +1248,9 @@ st.markdown(
 
     h1 {
 
-        color: #9f1239 !important;
+        color: #6d28d9 !important;
 
-        font-size: 2.4rem !important;
+        font-size: 2.45rem !important;
 
         font-weight: 950 !important;
 
@@ -1258,14 +1261,14 @@ st.markdown(
 
     h2, h3 {
 
-        color: #9f1239 !important;
+        color: #7c3aed !important;
 
         font-weight: 900 !important;
     }
 
     p, span, label {
 
-        color: #6b2d2d;
+        color: #4c1d95;
     }
 
     /* =====================
@@ -1274,18 +1277,18 @@ st.markdown(
 
     .stTabs [data-baseweb="tab-list"] {
 
-        background: rgba(255,255,255,0.42);
+        background: rgba(255,255,255,0.38);
 
-        backdrop-filter: blur(18px);
+        backdrop-filter: blur(20px);
 
         border-radius: 999px;
 
         padding: 0.42rem;
 
-        border: 1px solid rgba(255,255,255,0.65);
+        border: 1px solid rgba(255,255,255,0.68);
 
         box-shadow:
-            0 12px 30px rgba(255, 160, 122, 0.18);
+            0 14px 32px rgba(168, 85, 247, 0.14);
 
         gap: 0.35rem;
     }
@@ -1294,7 +1297,7 @@ st.markdown(
 
         border-radius: 999px;
 
-        color: #9f1239;
+        color: #6d28d9;
 
         font-weight: 850;
 
@@ -1305,7 +1308,7 @@ st.markdown(
 
     .stTabs [data-baseweb="tab"]:hover {
 
-        background: rgba(255,240,235,0.8);
+        background: rgba(243,232,255,0.85);
     }
 
     .stTabs [aria-selected="true"] {
@@ -1313,38 +1316,38 @@ st.markdown(
         background:
             linear-gradient(
                 135deg,
-                #ff8a9e,
-                #ffb38a,
-                #ffd36e
+                #a855f7,
+                #c084fc,
+                #f472b6
             );
 
         color: white !important;
 
         box-shadow:
-            0 10px 24px rgba(255, 179, 138, 0.35);
+            0 12px 28px rgba(168, 85, 247, 0.28);
     }
 
     /* =====================
-       カード
+       メインカード
     ===================== */
 
     div[data-testid="stVerticalBlockBorderWrapper"] {
 
-        background: rgba(255,255,255,0.48);
+        background: rgba(255,255,255,0.36);
 
-        backdrop-filter: blur(20px);
+        backdrop-filter: blur(24px);
 
-        border-radius: 32px;
+        border-radius: 34px;
 
-        border: 1px solid rgba(255,255,255,0.65);
+        border: 1px solid rgba(255,255,255,0.62);
 
-        padding: 0.85rem !important;
+        padding: 0.9rem !important;
 
         margin-bottom: 1rem;
 
         box-shadow:
-            0 18px 40px rgba(255, 183, 197, 0.18),
-            0 8px 20px rgba(255, 200, 160, 0.10);
+            0 18px 40px rgba(168, 85, 247, 0.12),
+            0 8px 22px rgba(244, 114, 182, 0.08);
     }
 
     /* =====================
@@ -1353,18 +1356,18 @@ st.markdown(
 
     div[data-testid="stMetric"] {
 
-        background: rgba(255,255,255,0.45);
+        background: rgba(255,255,255,0.34);
 
-        backdrop-filter: blur(16px);
+        backdrop-filter: blur(18px);
 
-        border-radius: 28px;
+        border-radius: 30px;
 
         border: 1px solid rgba(255,255,255,0.7);
 
         padding: 1rem;
 
         box-shadow:
-            0 14px 34px rgba(255, 183, 197, 0.16);
+            0 14px 32px rgba(192, 132, 252, 0.16);
     }
 
     /* =====================
@@ -1377,9 +1380,9 @@ st.markdown(
         background:
             linear-gradient(
                 135deg,
-                #ff8fa8,
-                #ffb085,
-                #ffd36e
+                #9333ea,
+                #c084fc,
+                #f472b6
             ) !important;
 
         border: none !important;
@@ -1390,10 +1393,10 @@ st.markdown(
 
         font-weight: 900 !important;
 
-        padding: 0.65rem 1rem !important;
+        padding: 0.66rem 1rem !important;
 
         box-shadow:
-            0 10px 24px rgba(255, 176, 133, 0.28);
+            0 12px 28px rgba(168, 85, 247, 0.24);
 
         transition: all 0.16s ease;
     }
@@ -1404,7 +1407,7 @@ st.markdown(
         transform: translateY(-2px) scale(1.02);
 
         box-shadow:
-            0 14px 32px rgba(255, 176, 133, 0.4);
+            0 16px 34px rgba(168, 85, 247, 0.34);
     }
 
     /* =====================
@@ -1416,23 +1419,23 @@ st.markdown(
         background:
             linear-gradient(
                 135deg,
-                rgba(255,245,247,0.82),
-                rgba(255,237,224,0.78),
-                rgba(255,248,220,0.74)
+                rgba(255,255,255,0.42),
+                rgba(245,243,255,0.34),
+                rgba(253,244,255,0.28)
             );
 
-        backdrop-filter: blur(18px);
+        backdrop-filter: blur(22px);
 
-        border-radius: 30px;
+        border-radius: 32px;
 
         padding: 1rem 1.05rem;
 
         border: 1px solid rgba(255,255,255,0.7);
 
         box-shadow:
-            0 14px 30px rgba(255, 183, 197, 0.14);
+            0 14px 30px rgba(168, 85, 247, 0.12);
 
-        color: #7c2d12;
+        color: #4c1d95;
 
         margin-bottom: 1rem;
     }
@@ -1443,14 +1446,14 @@ st.markdown(
 
         font-weight: 950;
 
-        color: #9f1239;
+        color: #7c3aed;
 
         margin-bottom: 0.2rem;
     }
 
     .sub-card-text {
 
-        color: #7c2d12;
+        color: #5b21b6;
 
         font-weight: 700;
     }
@@ -1464,22 +1467,22 @@ st.markdown(
         background:
             linear-gradient(
                 135deg,
-                rgba(255,255,255,0.72),
-                rgba(255,245,240,0.6)
+                rgba(255,255,255,0.48),
+                rgba(243,232,255,0.28)
             );
 
-        backdrop-filter: blur(16px);
+        backdrop-filter: blur(18px);
 
-        border-radius: 28px;
+        border-radius: 30px;
 
         padding: 1rem;
 
         margin-bottom: 0.8rem;
 
-        border-left: 8px solid #ffb085;
+        border-left: 8px solid #c084fc;
 
         box-shadow:
-            0 14px 32px rgba(255, 183, 197, 0.14);
+            0 14px 32px rgba(168, 85, 247, 0.14);
     }
 
     /* =====================
@@ -1491,16 +1494,16 @@ st.markdown(
         background:
             linear-gradient(
                 135deg,
-                #ffe0e9,
-                #ffe7d1,
-                #fff0b8
+                #ede9fe,
+                #f5d0fe,
+                #fbcfe8
             );
 
-        color: #9f1239;
+        color: #6d28d9;
 
-        border-radius: 22px;
+        border-radius: 24px;
 
-        padding: 0.7rem 1rem;
+        padding: 0.72rem 1rem;
 
         font-weight: 950;
 
@@ -1509,7 +1512,7 @@ st.markdown(
         margin-bottom: 0.75rem;
 
         box-shadow:
-            0 10px 24px rgba(255, 183, 197, 0.16);
+            0 10px 24px rgba(192, 132, 252, 0.18);
     }
 
     /* =====================
@@ -1527,15 +1530,15 @@ st.markdown(
         background:
             linear-gradient(
                 135deg,
-                #ffe0e9,
-                #fff0c7
+                #f3e8ff,
+                #fce7f3
             );
 
-        color: #9f1239;
+        color: #7c3aed;
 
-        font-weight: 800;
+        font-weight: 850;
 
-        border: 1px solid rgba(255,255,255,0.7);
+        border: 1px solid rgba(255,255,255,0.72);
 
         margin-right: 0.35rem;
 
@@ -1548,18 +1551,18 @@ st.markdown(
 
     div[data-testid="stExpander"] {
 
-        background: rgba(255,255,255,0.42);
+        background: rgba(255,255,255,0.32);
 
-        backdrop-filter: blur(16px);
+        backdrop-filter: blur(18px);
 
-        border-radius: 24px;
+        border-radius: 26px;
 
-        border: 1px solid rgba(255,255,255,0.72);
+        border: 1px solid rgba(255,255,255,0.68);
 
         overflow: hidden;
 
         box-shadow:
-            0 10px 24px rgba(255, 200, 160, 0.12);
+            0 10px 24px rgba(168, 85, 247, 0.10);
 
         margin-top: 0.7rem;
 
@@ -1573,24 +1576,24 @@ st.markdown(
     input,
     textarea {
 
-        border-radius: 16px !important;
+        border-radius: 18px !important;
 
-        border: 1px solid #ffd2c7 !important;
+        border: 1px solid #ddd6fe !important;
 
-        background: rgba(255,255,255,0.75) !important;
+        background: rgba(255,255,255,0.62) !important;
     }
 
     div[data-baseweb="select"] > div {
 
-        border-radius: 16px !important;
+        border-radius: 18px !important;
 
-        border-color: #ffd2c7 !important;
+        border-color: #ddd6fe !important;
 
-        background: rgba(255,255,255,0.72) !important;
+        background: rgba(255,255,255,0.55) !important;
     }
 
     /* =====================
-       プログレスバー
+       Progress Bar
     ===================== */
 
     div[data-testid="stProgress"] > div > div > div {
@@ -1598,9 +1601,9 @@ st.markdown(
         background:
             linear-gradient(
                 135deg,
-                #ff8fa8,
-                #ffb085,
-                #ffd36e
+                #9333ea,
+                #c084fc,
+                #f472b6
             );
     }
 
@@ -1618,7 +1621,7 @@ st.markdown(
             linear-gradient(
                 90deg,
                 transparent,
-                #ffc9b8,
+                #d8b4fe,
                 transparent
             );
 
@@ -1638,8 +1641,8 @@ st.markdown(
         background:
             linear-gradient(
                 180deg,
-                #ff9fb2,
-                #ffbf94
+                #a855f7,
+                #f472b6
             );
 
         border-radius: 999px;
