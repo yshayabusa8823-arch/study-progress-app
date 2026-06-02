@@ -154,6 +154,15 @@ def safe_int(value, default=0):
     except Exception:
         return default
 
+def days_until_exam(month, day):
+    today = today_jst()
+    exam_date = date(today.year, month, day)
+
+    if exam_date < today:
+        exam_date = date(today.year + 1, month, day)
+
+    return exam_date, (exam_date - today).days
+
 
 def next_id(df, id_col):
     if df.empty or id_col not in df.columns:
@@ -1534,7 +1543,34 @@ top_col1, top_col2 = st.columns([3, 1])
 with top_col1:
     st.markdown("# 📚 Study Progress")
     st.caption("問題単位で進捗・復習・翌日のタスクを管理するアプリ")
+    exams = [
+        ("中央", 8, 22, "🔥"),
+        ("早稲田", 8, 29, "🌸"),
+        ("慶応", 9, 5, "💎"),
+    ]
 
+    st.markdown("### ⏳ 受験日カウントダウン")
+
+    exam_cols = st.columns(3)
+
+    for col, (name, month, day, icon) in zip(exam_cols, exams):
+        exam_date, days_left = days_until_exam(month, day)
+
+        with col:
+            st.markdown(
+                f"""
+                <div class="sub-card">
+                    <div class="sub-card-title">{icon} {name}</div>
+                    <div class="sub-card-text">
+                        {exam_date.month}月{exam_date.day}日まで<br>
+                        <span style="font-size:1.6rem; font-weight:900;">
+                            あと {days_left} 日
+                        </span>
+                    </div>
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
     st.markdown(
         """
         <div class="sub-card">
