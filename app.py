@@ -1227,11 +1227,14 @@ st.markdown(
     }
 
 /* =========================================================
-   雪・キラキラの主張強め版
-   今の .stApp::before / .stApp::after / keyframes を置き換え
+   色調整版
+   ・水色かなり薄め
+   ・白発光強め
+   ・ブルベ夏の透明感重視
 ========================================================= */
 
 .stApp::before {
+
     content:
         "❄        ✦          ❅        ✧"
         "      ❆        ⋆          ❄"
@@ -1239,29 +1242,34 @@ st.markdown(
 
     position: fixed;
     inset: 0;
+
     pointer-events: none;
     z-index: 0;
 
     white-space: pre-wrap;
-    color: rgba(255,255,255,0.92);
+
+    color: rgba(255,255,255,0.96);
 
     font-size: 30px;
     line-height: 135px;
     letter-spacing: 32px;
     padding: 24px 34px;
 
-    opacity: 0.62;
+    opacity: 0.68;
 
     text-shadow:
         0 0 8px rgba(255,255,255,1),
-        0 0 18px rgba(255,255,255,0.9),
-        0 0 34px rgba(196,181,253,0.75),
-        0 0 48px rgba(147,197,253,0.55);
+        0 0 18px rgba(255,255,255,0.95),
+        0 0 32px rgba(255,255,255,0.85),
+        0 0 42px rgba(233,236,255,0.65),
+        0 0 58px rgba(245,243,255,0.55);
 
-    animation: snowFloatStrong 14s ease-in-out infinite alternate;
+    animation:
+        snowFloatStrong 14s ease-in-out infinite alternate;
 }
 
 .stApp::after {
+
     content:
         "✦     ❄        ✧       ❅       ⋆"
         "   ❆       ✦       ❄       ✧"
@@ -1269,44 +1277,70 @@ st.markdown(
 
     position: fixed;
     inset: 0;
+
     pointer-events: none;
     z-index: 0;
 
     white-space: pre-wrap;
-    color: rgba(245,243,255,0.86);
+
+    /* ここを超薄水色に */
+
+    color: rgba(240,247,255,0.88);
 
     font-size: 18px;
     line-height: 95px;
     letter-spacing: 24px;
     padding: 58px 18px;
 
-    opacity: 0.50;
+    opacity: 0.52;
 
     text-shadow:
-        0 0 8px rgba(255,255,255,0.95),
-        0 0 18px rgba(216,180,254,0.7),
-        0 0 28px rgba(191,219,254,0.55);
+        0 0 8px rgba(255,255,255,0.98),
+        0 0 16px rgba(255,255,255,0.92),
+        0 0 26px rgba(238,242,255,0.72),
+        0 0 36px rgba(230,238,255,0.48);
 
-    animation: snowDriftStrong 20s linear infinite;
+    animation:
+        snowDriftStrong 20s linear infinite;
 }
 
+/* =========================================================
+   動き
+========================================================= */
+
 @keyframes snowFloatStrong {
+
     0% {
-        transform: translateY(0px) translateX(0px) scale(1);
+
+        transform:
+            translateY(0px)
+            translateX(0px)
+            scale(1);
     }
 
     100% {
-        transform: translateY(-22px) translateX(14px) scale(1.03);
+
+        transform:
+            translateY(-22px)
+            translateX(14px)
+            scale(1.03);
     }
 }
 
 @keyframes snowDriftStrong {
+
     0% {
-        transform: translateY(-20px) translateX(0px);
+
+        transform:
+            translateY(-20px)
+            translateX(0px);
     }
 
     100% {
-        transform: translateY(24px) translateX(-12px);
+
+        transform:
+            translateY(24px)
+            translateX(-12px);
     }
 }
     .block-container {
