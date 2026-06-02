@@ -1211,25 +1211,24 @@ st.markdown(
     <style>
 
     /* =====================
-       ブルベ夏 × ガラス風
-       低彩度・高明度・青み系
+       ブルベ夏 × 高級感 × ガラス風
+       黒文字強化版
     ===================== */
 
     .stApp {
 
         background:
-            radial-gradient(circle at top left, rgba(196,181,253,0.20) 0%, transparent 30%),
-            radial-gradient(circle at top right, rgba(191,219,254,0.18) 0%, transparent 28%),
-            radial-gradient(circle at bottom left, rgba(233,213,255,0.18) 0%, transparent 25%),
+            radial-gradient(circle at top left, rgba(196,181,253,0.16) 0%, transparent 28%),
+            radial-gradient(circle at top right, rgba(191,219,254,0.14) 0%, transparent 24%),
+            radial-gradient(circle at bottom left, rgba(233,213,255,0.10) 0%, transparent 22%),
 
             linear-gradient(
                 135deg,
                 #fcfbff 0%,
-                #f8f7ff 18%,
-                #f5f3ff 38%,
-                #f5f7ff 58%,
-                #f8faff 78%,
-                #ffffff 100%
+                #f7f5ff 20%,
+                #f4f4ff 40%,
+                #f6f8ff 62%,
+                #fbfcff 100%
             );
 
         background-attachment: fixed;
@@ -1237,9 +1236,9 @@ st.markdown(
 
     .block-container {
 
-        max-width: 860px;
+        max-width: 880px;
 
-        padding-top: 1.5rem;
+        padding-top: 1.4rem;
 
         padding-bottom: 3rem;
     }
@@ -1250,363 +1249,41 @@ st.markdown(
 
     h1 {
 
-        color: #6b5ca5 !important;
+        color: #000000 !important;
 
-        font-size: 2.4rem !important;
+        font-size: 2.7rem !important;
 
-        font-weight: 950 !important;
+        font-weight: 1000 !important;
 
-        letter-spacing: -0.04em;
+        letter-spacing: -0.06em;
 
-        margin-bottom: 0.25rem !important;
+        line-height: 1.05;
+
+        margin-bottom: 0.35rem !important;
     }
 
-    h2, h3 {
+    h2,
+    h3 {
 
-        color: #7b6ea8 !important;
+        color: #000000 !important;
 
-        font-weight: 900 !important;
+        font-weight: 1000 !important;
+
+        letter-spacing: -0.03em;
     }
 
-    p, span, label {
+    .stMarkdown h3 {
 
-        color: #5f6482;
+        color: #000000 !important;
+
+        font-weight: 1000 !important;
     }
 
-    /* =====================
-       タブ
-    ===================== */
-
-    .stTabs [data-baseweb="tab-list"] {
-
-        background: rgba(255,255,255,0.34);
-
-        backdrop-filter: blur(24px);
-
-        border-radius: 999px;
-
-        padding: 0.42rem;
-
-        border: 1px solid rgba(255,255,255,0.72);
-
-        box-shadow:
-            0 10px 28px rgba(180, 188, 255, 0.10);
-
-        gap: 0.35rem;
-    }
-
-    .stTabs [data-baseweb="tab"] {
-
-        border-radius: 999px;
-
-        color: #7b6ea8;
-
-        font-weight: 800;
-
-        padding: 0.5rem 1rem;
-
-        transition: all 0.16s ease;
-    }
-
-    .stTabs [data-baseweb="tab"]:hover {
-
-        background: rgba(245,243,255,0.72);
-    }
-
-    .stTabs [aria-selected="true"] {
-
-        background:
-            linear-gradient(
-                135deg,
-                #b8b5ff,
-                #d6c6f5,
-                #e6d6f5
-            );
-
-        color: #4b5563 !important;
-
-        box-shadow:
-            0 10px 24px rgba(196, 181, 253, 0.18);
-    }
-
-    /* =====================
-       メインカード
-    ===================== */
-
-    div[data-testid="stVerticalBlockBorderWrapper"] {
-
-        background: rgba(255,255,255,0.30);
-
-        backdrop-filter: blur(26px);
-
-        border-radius: 34px;
-
-        border: 1px solid rgba(255,255,255,0.72);
-
-        padding: 0.9rem !important;
-
-        margin-bottom: 1rem;
-
-        box-shadow:
-            0 16px 36px rgba(196, 181, 253, 0.08),
-            0 6px 18px rgba(191, 219, 254, 0.06);
-    }
-
-    /* =====================
-       Metric
-    ===================== */
-
-    div[data-testid="stMetric"] {
-
-        background: rgba(255,255,255,0.26);
-
-        backdrop-filter: blur(20px);
-
-        border-radius: 30px;
-
-        border: 1px solid rgba(255,255,255,0.76);
-
-        padding: 1rem;
-
-        box-shadow:
-            0 10px 26px rgba(196, 181, 253, 0.10);
-    }
-
-    /* =====================
-       ボタン
-    ===================== */
-
-    .stButton > button,
-    button[kind="primary"] {
-
-        background:
-            linear-gradient(
-                135deg,
-                #b8b5ff,
-                #cfc8f3,
-                #dfe7ff
-            ) !important;
-
-        border: none !important;
-
-        border-radius: 999px !important;
-
-        color: #4b5563 !important;
-
-        font-weight: 850 !important;
-
-        padding: 0.66rem 1rem !important;
-
-        box-shadow:
-            0 10px 24px rgba(196, 181, 253, 0.16);
-
-        transition: all 0.16s ease;
-    }
-
-    .stButton > button:hover,
-    button[kind="primary"]:hover {
-
-        transform: translateY(-2px);
-
-        box-shadow:
-            0 14px 30px rgba(196, 181, 253, 0.20);
-    }
-
-    /* =====================
-       サブカード
-    ===================== */
-
-    .sub-card {
-
-        background:
-            linear-gradient(
-                135deg,
-                rgba(255,255,255,0.34),
-                rgba(245,243,255,0.26),
-                rgba(239,246,255,0.24)
-            );
-
-        backdrop-filter: blur(24px);
-
-        border-radius: 32px;
-
-        padding: 1rem 1.05rem;
-
-        border: 1px solid rgba(255,255,255,0.76);
-
-        box-shadow:
-            0 12px 28px rgba(196, 181, 253, 0.08);
-
-        color: #5f6482;
-
-        margin-bottom: 1rem;
-    }
-
-    .sub-card-title {
-
-        font-size: 1rem;
-
-        font-weight: 900;
-
-        color: #7b6ea8;
-
-        margin-bottom: 0.2rem;
-    }
-
-    .sub-card-text {
-
-        color: #5f6482;
-
-        font-weight: 700;
-    }
-
-    /* =====================
-       タスクカード
-    ===================== */
-
-    .subject-task-card {
-
-        background:
-            linear-gradient(
-                135deg,
-                rgba(255,255,255,0.38),
-                rgba(245,243,255,0.22)
-            );
-
-        backdrop-filter: blur(20px);
-
-        border-radius: 30px;
-
-        padding: 1rem;
-
-        margin-bottom: 0.8rem;
-
-        border-left: 8px solid #c7c3f7;
-
-        box-shadow:
-            0 12px 28px rgba(196, 181, 253, 0.08);
-    }
-
-    /* =====================
-       グループタイトル
-    ===================== */
-
-    .group-title {
-
-        background:
-            linear-gradient(
-                135deg,
-                #f1efff,
-                #f6f2ff,
-                #eef4ff
-            );
-
-        color: #6b5ca5;
-
-        border-radius: 24px;
-
-        padding: 0.72rem 1rem;
-
-        font-weight: 950;
-
-        margin-top: 1.2rem;
-
-        margin-bottom: 0.75rem;
-
-        box-shadow:
-            0 8px 20px rgba(196, 181, 253, 0.10);
-    }
-
-    /* =====================
-       ピル
-    ===================== */
-
-    .pill {
-
-        display: inline-block;
-
-        padding: 0.26rem 0.78rem;
-
-        border-radius: 999px;
-
-        background:
-            linear-gradient(
-                135deg,
-                #f3f0ff,
-                #eef4ff
-            );
-
-        color: #7b6ea8;
-
-        font-weight: 800;
-
-        border: 1px solid rgba(255,255,255,0.76);
-
-        margin-right: 0.35rem;
-
-        margin-bottom: 0.35rem;
-    }
-
-    /* =====================
-       Expander
-    ===================== */
-
-    div[data-testid="stExpander"] {
-
-        background: rgba(255,255,255,0.24);
-
-        backdrop-filter: blur(20px);
-
-        border-radius: 26px;
-
-        border: 1px solid rgba(255,255,255,0.76);
-
-        overflow: hidden;
-
-        box-shadow:
-            0 8px 20px rgba(196, 181, 253, 0.08);
-
-        margin-top: 0.7rem;
-
-        margin-bottom: 0.7rem;
-    }
-
-    /* =====================
-       Input
-    ===================== */
-
-    input,
-    textarea {
-
-        border-radius: 18px !important;
-
-        border: 1px solid #e5e7ff !important;
-
-        background: rgba(255,255,255,0.48) !important;
-    }
-
-    div[data-baseweb="select"] > div {
-
-        border-radius: 18px !important;
-
-        border-color: #e5e7ff !important;
-
-        background: rgba(255,255,255,0.42) !important;
-    }
-
-    /* =====================
-       Progress Bar
-    ===================== */
-
-    div[data-testid="stProgress"] > div > div > div {
-
-        background:
-            linear-gradient(
-                135deg,
-                #b8b5ff,
-                #d6c6f5,
-                #dbeafe
-            );
+    p,
+    span,
+    label {
+
+        color: #222222;
     }
 
     /* =====================
@@ -1623,11 +1300,344 @@ st.markdown(
             linear-gradient(
                 90deg,
                 transparent,
-                #ddd6fe,
+                #d7d9ee,
                 transparent
             );
 
-        margin: 1.5rem 0;
+        margin: 1.6rem 0;
+    }
+
+    /* =====================
+       タブ
+    ===================== */
+
+    .stTabs [data-baseweb="tab-list"] {
+
+        background: rgba(255,255,255,0.34);
+
+        backdrop-filter: blur(24px);
+
+        border-radius: 999px;
+
+        padding: 0.42rem;
+
+        border: 1px solid rgba(255,255,255,0.82);
+
+        box-shadow:
+            0 10px 28px rgba(180, 188, 255, 0.08);
+
+        gap: 0.35rem;
+    }
+
+    .stTabs [data-baseweb="tab"] {
+
+        border-radius: 999px;
+
+        color: #444444;
+
+        font-weight: 900;
+
+        padding: 0.52rem 1rem;
+
+        transition: all 0.16s ease;
+    }
+
+    .stTabs [aria-selected="true"] {
+
+        background:
+            linear-gradient(
+                135deg,
+                #c7c3ff,
+                #ddd7ff,
+                #edf2ff
+            );
+
+        color: #000000 !important;
+
+        box-shadow:
+            0 8px 22px rgba(196, 181, 253, 0.16);
+    }
+
+    /* =====================
+       カード
+    ===================== */
+
+    div[data-testid="stVerticalBlockBorderWrapper"] {
+
+        background: rgba(255,255,255,0.28);
+
+        backdrop-filter: blur(26px);
+
+        border-radius: 34px;
+
+        border: 1px solid rgba(255,255,255,0.78);
+
+        padding: 1rem !important;
+
+        margin-bottom: 1rem;
+
+        box-shadow:
+            0 16px 36px rgba(196,181,253,0.06),
+            0 4px 14px rgba(180,188,255,0.05);
+    }
+
+    /* =====================
+       Metric
+    ===================== */
+
+    div[data-testid="stMetric"] {
+
+        background: rgba(255,255,255,0.24);
+
+        backdrop-filter: blur(20px);
+
+        border-radius: 30px;
+
+        border: 1px solid rgba(255,255,255,0.82);
+
+        padding: 1rem;
+
+        box-shadow:
+            0 10px 24px rgba(196,181,253,0.08);
+    }
+
+    div[data-testid="stMetricLabel"] {
+
+        color: #111111 !important;
+
+        font-weight: 950 !important;
+
+        opacity: 1 !important;
+    }
+
+    div[data-testid="stMetricValue"] {
+
+        color: #000000 !important;
+
+        font-weight: 1000 !important;
+    }
+
+    /* =====================
+       ボタン
+    ===================== */
+
+    .stButton > button,
+    button[kind="primary"] {
+
+        background:
+            linear-gradient(
+                135deg,
+                #d7d3ff,
+                #e6e2ff
+            ) !important;
+
+        border: 1px solid rgba(199,195,255,0.75) !important;
+
+        border-radius: 999px !important;
+
+        color: #000000 !important;
+
+        font-weight: 950 !important;
+
+        font-size: 1rem !important;
+
+        padding: 0.78rem 1.2rem !important;
+
+        box-shadow:
+            0 8px 20px rgba(196,181,253,0.10);
+
+        transition: all 0.16s ease;
+    }
+
+    .stButton > button:hover,
+    button[kind="primary"]:hover {
+
+        transform: translateY(-2px);
+
+        background:
+            linear-gradient(
+                135deg,
+                #d1ccff,
+                #e2dcff
+            ) !important;
+
+        box-shadow:
+            0 14px 28px rgba(196,181,253,0.16);
+    }
+
+    /* =====================
+       サブカード
+    ===================== */
+
+    .sub-card {
+
+        background:
+            linear-gradient(
+                135deg,
+                rgba(255,255,255,0.34),
+                rgba(245,243,255,0.22),
+                rgba(239,246,255,0.18)
+            );
+
+        backdrop-filter: blur(24px);
+
+        border-radius: 32px;
+
+        padding: 1rem 1.1rem;
+
+        border: 1px solid rgba(255,255,255,0.82);
+
+        box-shadow:
+            0 10px 24px rgba(196,181,253,0.06);
+
+        margin-bottom: 1rem;
+    }
+
+    .sub-card-title {
+
+        font-size: 1.02rem;
+
+        font-weight: 1000;
+
+        color: #000000;
+
+        margin-bottom: 0.22rem;
+    }
+
+    .sub-card-text {
+
+        color: #333333;
+
+        font-weight: 700;
+    }
+
+    /* =====================
+       グループタイトル
+    ===================== */
+
+    .group-title {
+
+        background:
+            linear-gradient(
+                135deg,
+                #f2efff,
+                #f7f5ff,
+                #f4f7ff
+            );
+
+        color: #000000;
+
+        border-radius: 24px;
+
+        padding: 0.8rem 1rem;
+
+        font-size: 1.02rem;
+
+        font-weight: 1000;
+
+        margin-top: 1.2rem;
+
+        margin-bottom: 0.8rem;
+
+        border: 1px solid rgba(255,255,255,0.82);
+
+        box-shadow:
+            0 8px 20px rgba(196,181,253,0.08);
+    }
+
+    /* =====================
+       ピル
+    ===================== */
+
+    .pill {
+
+        display: inline-block;
+
+        padding: 0.28rem 0.82rem;
+
+        border-radius: 999px;
+
+        background:
+            linear-gradient(
+                135deg,
+                #f3f1ff,
+                #eef3ff
+            );
+
+        color: #444444;
+
+        font-weight: 850;
+
+        border: 1px solid rgba(255,255,255,0.82);
+
+        margin-right: 0.35rem;
+
+        margin-bottom: 0.35rem;
+    }
+
+    /* =====================
+       Expander
+    ===================== */
+
+    div[data-testid="stExpander"] {
+
+        background: rgba(255,255,255,0.22);
+
+        backdrop-filter: blur(22px);
+
+        border-radius: 26px;
+
+        border: 1px solid rgba(255,255,255,0.82);
+
+        overflow: hidden;
+
+        box-shadow:
+            0 8px 18px rgba(196,181,253,0.06);
+
+        margin-top: 0.7rem;
+
+        margin-bottom: 0.7rem;
+    }
+
+    /* =====================
+       入力欄
+    ===================== */
+
+    input,
+    textarea {
+
+        border-radius: 18px !important;
+
+        border: 1px solid #e3e5ff !important;
+
+        background: rgba(255,255,255,0.46) !important;
+
+        color: #000000 !important;
+    }
+
+    div[data-baseweb="select"] > div {
+
+        border-radius: 18px !important;
+
+        border-color: #e3e5ff !important;
+
+        background: rgba(255,255,255,0.42) !important;
+
+        color: #000000 !important;
+    }
+
+    /* =====================
+       Progress Bar
+    ===================== */
+
+    div[data-testid="stProgress"] > div > div > div {
+
+        background:
+            linear-gradient(
+                135deg,
+                #c7c3ff,
+                #d7dfff
+            );
     }
 
     /* =====================
@@ -1635,6 +1645,7 @@ st.markdown(
     ===================== */
 
     ::-webkit-scrollbar {
+
         width: 10px;
     }
 
@@ -1643,7 +1654,7 @@ st.markdown(
         background:
             linear-gradient(
                 180deg,
-                #c4b5fd,
+                #c7c3ff,
                 #dbeafe
             );
 
@@ -1651,6 +1662,7 @@ st.markdown(
     }
 
     ::-webkit-scrollbar-track {
+
         background: transparent;
     }
 
