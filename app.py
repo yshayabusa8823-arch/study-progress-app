@@ -1698,6 +1698,67 @@ span[data-baseweb="tag"] svg {
     color: #6d5dfc !important;
     fill: #6d5dfc !important;
 }
+
+/* =========================
+   カード hover 演出
+========================= */
+
+.sub-card,
+div[data-testid="stVerticalBlockBorderWrapper"] {
+    transition:
+        transform 0.18s ease,
+        box-shadow 0.18s ease,
+        background 0.18s ease;
+}
+
+.sub-card:hover,
+div[data-testid="stVerticalBlockBorderWrapper"]:hover {
+    transform: translateY(-4px);
+    box-shadow:
+        0 22px 46px rgba(167,139,250,0.18),
+        0 8px 18px rgba(147,197,253,0.12),
+        inset 0 1px 0 rgba(255,255,255,0.65);
+}
+
+/* =========================
+   Metricカード hover
+========================= */
+
+div[data-testid="stMetric"] {
+    transition:
+        transform 0.18s ease,
+        box-shadow 0.18s ease,
+        background 0.18s ease;
+}
+
+div[data-testid="stMetric"]:hover {
+    transform: translateY(-4px);
+
+    box-shadow:
+        0 22px 46px rgba(167,139,250,0.18),
+        0 8px 18px rgba(147,197,253,0.12),
+        inset 0 1px 0 rgba(255,255,255,0.65);
+}
+
+/* =========================
+   タスクカード hover
+========================= */
+
+.task-card {
+    transition:
+        transform 0.18s ease,
+        box-shadow 0.18s ease,
+        background 0.18s ease;
+}
+
+.task-card:hover {
+    transform: translateY(-5px);
+
+    box-shadow:
+        0 24px 48px rgba(167,139,250,0.20),
+        0 10px 22px rgba(147,197,253,0.14),
+        inset 0 1px 0 rgba(255,255,255,0.68);
+}
     </style>
     """,
     unsafe_allow_html=True
@@ -2101,7 +2162,7 @@ with tab_today:
                         style = subject_style(subject_name)
 
                         card_html = f"""
-                        <div style="
+                        <div class="task-card" style="
                             padding:1rem;
                             border-radius:22px;
                             margin-bottom:0.8rem;
