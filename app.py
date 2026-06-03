@@ -1323,101 +1323,108 @@ st.markdown(
    ・ブルベ夏の透明感重視
 ========================================================= */
 
+/* =========================
+   雪 + うっすらモチーフ
+========================= */
+
 .stApp::before {
     content:
-        "✦        ❄          ✧       ✦"
-        "      ✧        ❄          ✦"
-        "   ✦        ✧       ❄        ✦";
+        "❄        ✦         ☁️"
+        "      🫧         ✧"
+        "  🌼          ❄        ⭐"
+        "       ✦           ☁️"
+        " 🦋          ✧         ❄";
 
     position: fixed;
     inset: 0;
+
     pointer-events: none;
     z-index: 0;
+
     white-space: pre-wrap;
 
-    color: rgba(255,255,255,0.94);
+    font-size: 22px;
+    line-height: 150px;
+    letter-spacing: 36px;
 
-    font-size: 30px;
-    line-height: 135px;
-    letter-spacing: 34px;
-    padding: 28px 34px;
+    padding: 24px 30px;
 
-    opacity: 0.78;
+    opacity: 0.16;
+
+    filter: blur(0.2px);
 
     text-shadow:
-        0 0 8px rgba(255,255,255,1),
-        0 0 18px rgba(255,255,255,0.95),
-        0 0 34px rgba(255,255,255,0.8),
-        0 0 48px rgba(245,243,255,0.55);
+        0 0 8px rgba(255,255,255,0.9),
+        0 0 16px rgba(255,255,255,0.65);
 
-    animation: snowFloatStrong 14s ease-in-out infinite alternate;
+    animation: floatBackground 22s ease-in-out infinite alternate;
 }
+
+/* 奥側レイヤー */
 
 .stApp::after {
     content:
-        "✧     ✦        ✧       ✦       ⋆"
-        "   ❄       ✦       ✧       ❄"
-        "      ✦        ⋆       ✧       ✦";
+        "✧         🫧          ❄"
+        "    ☁️          🌼"
+        " ✦         🦋         ✧"
+        "      ⭐           ❄";
 
     position: fixed;
     inset: 0;
+
     pointer-events: none;
     z-index: 0;
+
     white-space: pre-wrap;
 
-    color: rgba(255,255,255,0.86);
+    font-size: 16px;
+    line-height: 180px;
+    letter-spacing: 44px;
 
-    font-size: 18px;
-    line-height: 95px;
-    letter-spacing: 25px;
-    padding: 58px 18px;
+    padding: 60px 12px;
 
-    opacity: 0.62;
+    opacity: 0.10;
+
+    filter: blur(0.4px);
 
     text-shadow:
-        0 0 6px rgba(255,255,255,0.95),
-        0 0 14px rgba(255,255,255,0.82),
-        0 0 26px rgba(245,243,255,0.55);
+        0 0 6px rgba(255,255,255,0.8);
 
-    animation: snowDriftStrong 20s linear infinite;
+    animation: floatBackgroundSlow 30s ease-in-out infinite alternate;
 }
 
-/* =========================================================
-   動き
-========================================================= */
+/* =========================
+   ふわふわ動き
+========================= */
 
-@keyframes snowFloatStrong {
+@keyframes floatBackground {
 
     0% {
-
         transform:
             translateY(0px)
             translateX(0px)
-            scale(1);
+            rotate(0deg);
     }
 
     100% {
-
         transform:
-            translateY(-22px)
-            translateX(14px)
-            scale(1.03);
+            translateY(-18px)
+            translateX(10px)
+            rotate(1deg);
     }
 }
 
-@keyframes snowDriftStrong {
+@keyframes floatBackgroundSlow {
 
     0% {
-
         transform:
-            translateY(-20px)
+            translateY(0px)
             translateX(0px);
     }
 
     100% {
-
         transform:
-            translateY(24px)
+            translateY(14px)
             translateX(-12px);
     }
 }
