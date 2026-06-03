@@ -1798,7 +1798,7 @@ with top_col1:
             unsafe_allow_html=True
         )
 
-        st.markdown(
+    st.markdown(
     f"""
     <div class="sub-card">
         <div class="sub-card-title">🧠 今日の学習分析</div>
