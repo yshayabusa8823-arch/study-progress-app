@@ -6,10 +6,13 @@ from datetime import date, timedelta, datetime
 from zoneinfo import ZoneInfo
 import time
 import json
+import random
+
+
 
 st.set_page_config(
     page_title="Study Progress",
-    page_icon="📚",
+    page_icon="❄",
     layout="centered"
 )
 
@@ -27,7 +30,44 @@ WEEKDAY_MAP = {
 
 WEEKDAYS = ["月", "火", "水","木", "金", "土", "日"]
 
+MOTIVATION_MESSAGES = [
 
+    ("🌸 今日も少しずつ積み上げよう",
+     "完璧じゃなくてOK。1問進めば、ちゃんと前に進んでる。"),
+
+    ("❄ 焦らなくて大丈夫",
+     "積み重ねは、見えないところでもちゃんと育ってる。"),
+
+    ("🌙 今日の1問が未来を変える",
+     "小さい前進でも、続けば大きな力になる。"),
+
+    ("✨ 今やるその1問が強い",
+     "モチベが低い日でも、進んだ事実は残る。"),
+
+    ("📚 ゆっくりでも進んでる",
+     "昨日より少し前に進めば、それで十分。"),
+
+    ("💎 今日の努力は消えない",
+     "理解に時間がかかっても、ちゃんと積み上がってる。"),
+
+    ("🫧 まずは1問だけ",
+     "始めると意外と進められる日もある。"),
+
+    ("🌠 苦手発見は前進",
+     "できなかった問題は、伸びしろを見つけた証拠。"),
+
+    ("☕ 無理しすぎなくてOK",
+     "継続できるペースが、一番強い。"),
+
+    ("🩵 今日ここを開いた時点で偉い",
+     "勉強しようと思った、その気持ちがもう前進。"),
+
+    ("📖 積み重ねは裏切らない",
+     "数日後、数週間後にちゃんと差になる。"),
+
+    ("🌌 少しずつで大丈夫",
+     "焦るより、止まらないことの方が大事。"),
+]
 # =====================
 # Google Sheets 接続
 # =====================
@@ -1579,6 +1619,35 @@ st.markdown(
         background: transparent;
     }
 
+    /* =========================
+   触れる曜日タグの色
+========================= */
+
+span[data-baseweb="tag"] {
+    background: linear-gradient(
+        135deg,
+        #d8d3ff 0%,
+        #eeeaff 55%,
+        #f8faff 100%
+    ) !important;
+
+    color: #312e81 !important;
+
+    border: 1px solid rgba(167,139,250,0.45) !important;
+
+    border-radius: 14px !important;
+
+    font-weight: 900 !important;
+
+    box-shadow:
+        0 6px 14px rgba(167,139,250,0.14),
+        inset 0 1px 0 rgba(255,255,255,0.8) !important;
+}
+
+span[data-baseweb="tag"] svg {
+    color: #6d5dfc !important;
+    fill: #6d5dfc !important;
+}
     </style>
     """,
     unsafe_allow_html=True
@@ -1620,12 +1689,14 @@ with top_col1:
                 """,
                 unsafe_allow_html=True
             )
+    title, message = random.choice(MOTIVATION_MESSAGES)
+
     st.markdown(
-        """
+        f"""
         <div class="sub-card">
-            <div class="sub-card-title">🌸 今日も少しずつ積み上げよう</div>
+            <div class="sub-card-title">{title}</div>
             <div class="sub-card-text">
-                完璧じゃなくてOK。1問進めば、ちゃんと前に進んでる。
+                {message}
             </div>
         </div>
         """,
