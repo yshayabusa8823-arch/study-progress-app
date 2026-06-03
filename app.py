@@ -1324,16 +1324,20 @@ st.markdown(
 ========================================================= */
 
 /* =========================
-   雪 + うっすらモチーフ
+   雪 + ふわふわモチーフ
+   （花なし版）
 ========================= */
+
+/* メイン背景レイヤー */
 
 .stApp::before {
     content:
         "❄        ✦         ☁️"
         "      🫧         ✧"
-        "  🌼          ❄        ⭐"
+        "  ⭐          ❄        🫧"
         "       ✦           ☁️"
-        " 🦋          ✧         ❄";
+        " 🦋          ✧         ❄"
+        "      🫧          ⭐";
 
     position: fixed;
     inset: 0;
@@ -1343,31 +1347,33 @@ st.markdown(
 
     white-space: pre-wrap;
 
-    font-size: 22px;
+    font-size: 24px;
     line-height: 150px;
-    letter-spacing: 36px;
+    letter-spacing: 34px;
 
-    padding: 24px 30px;
+    padding: 26px 34px;
 
-    opacity: 0.16;
+    opacity: 0.24;
 
-    filter: blur(0.2px);
+    filter: blur(0.15px);
 
     text-shadow:
-        0 0 8px rgba(255,255,255,0.9),
-        0 0 16px rgba(255,255,255,0.65);
+        0 0 8px rgba(255,255,255,0.95),
+        0 0 18px rgba(196,181,253,0.45),
+        0 0 28px rgba(147,197,253,0.25);
 
-    animation: floatBackground 22s ease-in-out infinite alternate;
+    animation: floatSoft 20s ease-in-out infinite alternate;
 }
 
-/* 奥側レイヤー */
+/* 奥のふわふわレイヤー */
 
 .stApp::after {
     content:
         "✧         🫧          ❄"
-        "    ☁️          🌼"
-        " ✦         🦋         ✧"
-        "      ⭐           ❄";
+        "    ☁️          ✦"
+        " ❄         🦋         ✧"
+        "      ⭐           🫧"
+        "  ☁️          ✦";
 
     position: fixed;
     inset: 0;
@@ -1377,27 +1383,28 @@ st.markdown(
 
     white-space: pre-wrap;
 
-    font-size: 16px;
-    line-height: 180px;
-    letter-spacing: 44px;
+    font-size: 17px;
+    line-height: 185px;
+    letter-spacing: 42px;
 
-    padding: 60px 12px;
+    padding: 58px 16px;
 
-    opacity: 0.10;
+    opacity: 0.16;
 
-    filter: blur(0.4px);
+    filter: blur(0.45px);
 
     text-shadow:
-        0 0 6px rgba(255,255,255,0.8);
+        0 0 6px rgba(255,255,255,0.9),
+        0 0 14px rgba(221,214,254,0.35);
 
-    animation: floatBackgroundSlow 30s ease-in-out infinite alternate;
+    animation: floatSoftSlow 30s ease-in-out infinite alternate;
 }
 
 /* =========================
-   ふわふわ動き
+   雪アニメーション
 ========================= */
 
-@keyframes floatBackground {
+@keyframes floatSoft {
 
     0% {
         transform:
@@ -1408,13 +1415,13 @@ st.markdown(
 
     100% {
         transform:
-            translateY(-18px)
+            translateY(-20px)
             translateX(10px)
             rotate(1deg);
     }
 }
 
-@keyframes floatBackgroundSlow {
+@keyframes floatSoftSlow {
 
     0% {
         transform:
@@ -1424,8 +1431,8 @@ st.markdown(
 
     100% {
         transform:
-            translateY(14px)
-            translateX(-12px);
+            translateY(16px)
+            translateX(-14px);
     }
 }
     .block-container {
