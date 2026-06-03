@@ -1759,6 +1759,40 @@ div[data-testid="stMetric"]:hover {
         0 10px 22px rgba(147,197,253,0.14),
         inset 0 1px 0 rgba(255,255,255,0.68);
 }
+
+/* =========================
+   スライダーを薄紫に固定
+========================= */
+
+/* 左側の進んだバー */
+.stSlider [data-baseweb="slider"] div[role="presentation"]:first-child {
+    background: linear-gradient(
+        90deg,
+        #c4b5fd 0%,
+        #d8b4fe 50%,
+        #ddd6fe 100%
+    ) !important;
+
+    border-radius: 999px !important;
+}
+
+/* バー全体 */
+.stSlider [data-baseweb="slider"] > div > div {
+    background: rgba(255,255,255,0.42) !important;
+    border-radius: 999px !important;
+}
+
+/* つまみ */
+.stSlider [role="slider"] {
+    background: #ffffff !important;
+
+    border: 2px solid #c4b5fd !important;
+
+    box-shadow:
+        0 0 10px rgba(196,181,253,0.45),
+        0 0 18px rgba(221,214,254,0.35) !important;
+}
+
     </style>
     """,
     unsafe_allow_html=True
