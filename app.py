@@ -730,6 +730,29 @@ def calc_today_summary(tasks_df):
         "remaining": remaining
     }
 
+def calc_ai_ready_summary(logs_df):
+    today_str = str(today_jst())
+
+    if logs_df.empty:
+        return "まだ記録がありません。まず1問だけやってみよう。"
+
+    today_logs = logs_df[logs_df["date"].astype(str) == today_str]
+
+    if today_logs.empty:
+        return "今日はまだ記録がありません。まず1問だけ始めよう。"
+
+    weak_count = len(today_logs[today_logs["result"].astype(str) == "苦手"])
+    vague_count = len(today_logs[today_logs["result"].astype(str) == "微妙"])
+    perfect_count = len(today_logs[today_logs["result"].astype(str) == "完璧"])
+
+    if weak_count > 0:
+        return f"苦手が{weak_count}問あります。明日はこの復習を優先しよう。"
+    elif vague_count > 0:
+        return f"微妙が{vague_count}問あります。明日の復習で固めよう。"
+    elif perfect_count > 0:
+        return f"完璧が{perfect_count}問！かなり良いペース。"
+    else:
+        return "今日はまだ様子見。無理せず進めよう。"
 
 def calc_pace_summary(materials_df, questions_df):
     if materials_df.empty or questions_df.empty:
@@ -1152,19 +1175,9 @@ def save_learning_log(
     current_round = selected_q.get("round", 1)
     current_round = int(current_round) if str(current_round).isdigit() else 1
 
-    if result == "未完了":
-        new_status = "未着手"
-        next_review = selected_q.get("next_review_date", "")
-        new_round = current_round
-
-    elif task_type in ["復習", "苦手復習", "やり直し"] and result == "できた":
+    if result == "完璧":
         new_status = "完了"
         next_review = ""
-        new_round = current_round + 1
-
-    elif result == "できた":
-        new_status = "復習待ち"
-        next_review = today_jst() + timedelta(days=1)
         new_round = current_round + 1
 
     elif result == "微妙":
@@ -1172,10 +1185,15 @@ def save_learning_log(
         next_review = today_jst() + timedelta(days=1)
         new_round = current_round + 1
 
-    elif result == "できなかった":
+    elif result == "苦手":
         new_status = "苦手"
         next_review = today_jst() + timedelta(days=1)
         new_round = current_round + 1
+
+    elif result == "未完了":
+        new_status = "未着手"
+        next_review = selected_q.get("next_review_date", "")
+        new_round = current_round
 
     else:
         new_status = "未着手"
@@ -1705,6 +1723,7 @@ with top_col1:
 
     today_summary = calc_today_summary(tasks_df)
     pace_summary = calc_pace_summary(materials_df, questions_df)
+    ai_ready_message = calc_ai_ready_summary(logs_df)
 
     col1, col2, col3 = st.columns(3)
 
@@ -1746,6 +1765,18 @@ with top_col1:
             """,
             unsafe_allow_html=True
         )
+
+        st.markdown(
+    f"""
+    <div class="sub-card">
+        <div class="sub-card-title">🧠 今日の学習分析</div>
+        <div class="sub-card-text">
+            {ai_ready_message}
+        </div>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
 
 with top_col2:
     if st.button("🔄 更新", use_container_width=True):
@@ -2177,7 +2208,7 @@ with tab_today:
                         with st.expander("この問題を記録する"):
                             result = st.selectbox(
                                 "結果",
-                                ["できた", "微妙", "できなかった", "未完了"],
+                                ["完璧", "微妙", "苦手", "未完了"],
                                 key=f"today_result_{question_id}_{task_type}"
                             )
 
