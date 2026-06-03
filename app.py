@@ -731,28 +731,60 @@ def calc_today_summary(tasks_df):
     }
 
 def calc_ai_ready_summary(logs_df):
+
     today_str = str(today_jst())
 
     if logs_df.empty:
         return "まだ記録がありません。まず1問だけやってみよう。"
 
-    today_logs = logs_df[logs_df["date"].astype(str) == today_str]
+    today_logs = logs_df[
+        logs_df["date"].astype(str) == today_str
+    ]
 
     if today_logs.empty:
         return "今日はまだ記録がありません。まず1問だけ始めよう。"
 
-    weak_count = len(today_logs[today_logs["result"].astype(str) == "苦手"])
-    vague_count = len(today_logs[today_logs["result"].astype(str) == "微妙"])
-    perfect_count = len(today_logs[today_logs["result"].astype(str) == "完璧"])
+    weak_count = len(
+        today_logs[
+            today_logs["result"].astype(str) == "苦手"
+        ]
+    )
+
+    vague_count = len(
+        today_logs[
+            today_logs["result"].astype(str) == "微妙"
+        ]
+    )
+
+    perfect_count = len(
+        today_logs[
+            today_logs["result"].astype(str) == "完璧"
+        ]
+    )
+
+    messages = []
+
+    if perfect_count > 0:
+        messages.append(f"✨ 完璧 {perfect_count}問")
+
+    if vague_count > 0:
+        messages.append(f"🌱 微妙 {vague_count}問")
 
     if weak_count > 0:
-        return f"苦手が{weak_count}問あります。明日はこの復習を優先しよう。"
+        messages.append(f"🔥 苦手 {weak_count}問")
+
+    summary = " / ".join(messages)
+
+    if weak_count > 0:
+        advice = "苦手復習を優先しよう。"
+
     elif vague_count > 0:
-        return f"微妙が{vague_count}問あります。明日の復習で固めよう。"
-    elif perfect_count > 0:
-        return f"完璧が{perfect_count}問！かなり良いペース。"
+        advice = "明日の復習で固めよう。"
+
     else:
-        return "今日はまだ様子見。無理せず進めよう。"
+        advice = "かなり良いペース！"
+
+    return f"{summary}<br>{advice}"
 
 def calc_pace_summary(materials_df, questions_df):
     if materials_df.empty or questions_df.empty:
