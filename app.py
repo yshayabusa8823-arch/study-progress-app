@@ -1328,76 +1328,70 @@ st.markdown(
    （花なし版）
 ========================= */
 
-/* メイン背景レイヤー */
+/* =========================
+   背景：雪 + ふわふわモチーフ
+========================= */
 
 .stApp::before {
     content:
-        "❄        ✦         ☁️"
-        "      🫧         ✧"
-        "  ⭐          ❄        🫧"
-        "       ✦           ☁️"
-        " 🦋          ✧         ❄"
-        "      🫧          ⭐";
+        "❄        ✦       🫧        🦋"
+        "    ✧        ❄        ☁️"
+        "⭐        🫧        ✦       ❄"
+        "    🦋        ✧        ❄";
 
     position: fixed;
     inset: 0;
-
     pointer-events: none;
     z-index: 0;
-
     white-space: pre-wrap;
 
     font-size: 24px;
-    line-height: 150px;
-    letter-spacing: 34px;
+    line-height: 145px;
+    letter-spacing: 36px;
+    padding: 24px 32px;
 
-    padding: 26px 34px;
+    opacity: 0.22;
 
-    opacity: 0.24;
-
-    filter: blur(0.15px);
+    filter: saturate(1.25) blur(0.1px);
 
     text-shadow:
         0 0 8px rgba(255,255,255,0.95),
-        0 0 18px rgba(196,181,253,0.45),
-        0 0 28px rgba(147,197,253,0.25);
+        0 0 18px rgba(255,255,255,0.7),
+        0 0 28px rgba(196,181,253,0.35);
 
-    animation: floatSoft 20s ease-in-out infinite alternate;
+    animation:
+        snowFloatStrong 14s ease-in-out infinite alternate;
 }
-
-/* 奥のふわふわレイヤー */
 
 .stApp::after {
     content:
-        "✧         🫧          ❄"
-        "    ☁️          ✦"
-        " ❄         🦋         ✧"
-        "      ⭐           🫧"
-        "  ☁️          ✦";
+        "✧       ❄        🫧       ✦"
+        "   ☁️        🦋        ❄"
+        "✦        ⭐        ❄       🫧"
+        "     ✧        ❄        ✦";
 
     position: fixed;
     inset: 0;
-
     pointer-events: none;
     z-index: 0;
-
     white-space: pre-wrap;
 
     font-size: 17px;
-    line-height: 185px;
-    letter-spacing: 42px;
-
-    padding: 58px 16px;
+    line-height: 105px;
+    letter-spacing: 30px;
+    padding: 58px 18px;
 
     opacity: 0.16;
 
-    filter: blur(0.45px);
+    filter: saturate(1.2) blur(0.2px);
 
     text-shadow:
         0 0 6px rgba(255,255,255,0.9),
-        0 0 14px rgba(221,214,254,0.35);
+        0 0 14px rgba(255,255,255,0.65),
+        0 0 24px rgba(147,197,253,0.28);
 
-    animation: floatSoftSlow 30s ease-in-out infinite alternate;
+    animation:
+        snowDriftStrong 22s linear infinite;
 }
 
 /* =========================
