@@ -127,8 +127,18 @@ def connect_sheets():
             "undo_actions",
             undo_headers
         ),
+        "exams": get_or_create_worksheet(
+            spreadsheet,
+            "exams",
+            [
+                "user_id",
+                "exam_name",
+                "exam_date",
+                "icon",
+                "enabled"
+            ]
+        ),
     }
-
 
 # =====================
 # 共通関数
@@ -156,6 +166,10 @@ def load_all_data_live(sheets):
         "logs_df": load_sheet_live(sheets["logs"]),
         "tasks_df": load_sheet_live(sheets["daily_tasks"]),
         "undo_df": load_sheet_live(sheets["undo_actions"]),
+        "exams_df": load_sheet(
+            sheets["exams"],
+            "exams"
+        )
     }
 
 
@@ -1282,19 +1296,55 @@ questions_df = load_sheet(sheets["questions"], "questions")
 logs_df = load_sheet(sheets["logs"], "logs")
 tasks_df = load_sheet(sheets["daily_tasks"], "daily_tasks")
 undo_df = load_sheet(sheets["undo_actions"], "undo_actions")
+exams_df = load_sheet(
+    sheets["exams"],
+    "exams"
+)
+
+# =====================
+# ユーザー切り替え
+# =====================
+
+USER_OPTIONS = {
+    "syun": "しゅん",
+    "shiori": "しおり",
+}
+
+st.sidebar.title("⚙️ 設定")
+
+query_user = st.query_params.get("user", "shiori")
+
+if query_user not in USER_OPTIONS:
+    query_user = "shiori"
+
+user_id = st.sidebar.selectbox(
+    "ページを選択",
+    list(USER_OPTIONS.keys()),
+    index=list(USER_OPTIONS.keys()).index(query_user),
+    format_func=lambda x: USER_OPTIONS[x]
+)
+
+st.query_params["user"] = user_id
+
+exams_df = exams_df[
+    exams_df["user_id"].astype(str) == user_id
+].copy()
+
+# =====================
+# 選択ユーザーのデータだけ表示
+# =====================
+
+materials_df = materials_df[materials_df["user_id"].astype(str) == user_id].copy()
+questions_df = questions_df[questions_df["user_id"].astype(str) == user_id].copy()
+logs_df = logs_df[logs_df["user_id"].astype(str) == user_id].copy()
+tasks_df = tasks_df[tasks_df["user_id"].astype(str) == user_id].copy()
+undo_df = undo_df[undo_df["user_id"].astype(str) == user_id].copy()
 
 
 # =====================
 # CSS
 # =====================
 
-# =====================
-# CSS
-# =====================
-
-# =====================
-# CSS
-# =====================
 
 st.markdown(
     """
@@ -1806,34 +1856,40 @@ top_col1, top_col2 = st.columns([3, 1])
 with top_col1:
     st.markdown("# 📚 Study Progress")
     st.caption("問題単位で進捗・復習・翌日のタスクを管理するアプリ")
-    exams = [
-        ("中央", 8, 22, "🔥"),
-        ("早稲田", 8, 29, "🌸"),
-        ("慶応", 9, 5, "💎"),
-    ]
-
+    
     st.markdown("### ⏳ 受験日カウントダウン")
 
-    exam_cols = st.columns(3)
+    active_exams = exams_df[
+        exams_df["enabled"].astype(str).str.upper() == "TRUE"
+    ].copy()
 
-    for col, (name, month, day, icon) in zip(exam_cols, exams):
-        exam_date, days_left = days_until_exam(month, day)
+    if active_exams.empty:
+        st.info("受験日が登録されていません。")
+    else:
+        exam_cols = st.columns(min(len(active_exams), 4))
 
-        with col:
-            st.markdown(
-                f"""
-                <div class="sub-card">
-                    <div class="sub-card-title">{icon} {name}</div>
-                    <div class="sub-card-text">
-                        {exam_date.month}月{exam_date.day}日まで<br>
-                        <span style="font-size:1.6rem; font-weight:900;">
-                            あと {days_left} 日
-                        </span>
+        for i, (_, exam) in enumerate(active_exams.iterrows()):
+            exam_date = pd.to_datetime(exam["exam_date"]).date()
+            days_left = (exam_date - today_jst()).days
+
+            name = safe_str(exam.get("exam_name", ""))
+            icon = safe_str(exam.get("icon", "🎓"))
+
+            with exam_cols[i % len(exam_cols)]:
+                st.markdown(
+                    f"""
+                    <div class="sub-card">
+                        <div class="sub-card-title">{icon} {name}</div>
+                        <div class="sub-card-text">
+                            {exam_date.month}月{exam_date.day}日まで<br>
+                            <span style="font-size:1.6rem; font-weight:900;">
+                                あと {days_left} 日
+                            </span>
+                        </div>
                     </div>
-                </div>
-                """,
-                unsafe_allow_html=True
-            )
+                    """,
+                    unsafe_allow_html=True
+                )
     title, message = random.choice(MOTIVATION_MESSAGES)
 
     st.markdown(
@@ -2526,6 +2582,7 @@ with tab_material:
                 material_id = next_id(materials_df, "material_id")
 
                 sheets["materials"].append_row([
+                    user_id,
                     int(material_id),
                     subject,
                     material_name,
@@ -2539,6 +2596,7 @@ with tab_material:
 
                 for i in range(1, int(total_questions) + 1):
                     question_rows.append([
+                        user_id,
                         int(next_question_id),
                         int(material_id),
                         int(i),
