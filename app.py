@@ -925,7 +925,7 @@ def estimate_finish_plan(total, touched, study_days, target_date_raw):
 # タスク生成
 # =====================
 
-def generate_today_tasks(materials_df, questions_df, tasks_df, sheets):
+def generate_today_tasks(materials_df, questions_df, tasks_df, sheets, user_id):
     today = today_jst()
     today_str = str(today)
     new_rows = []
@@ -961,6 +961,7 @@ def generate_today_tasks(materials_df, questions_df, tasks_df, sheets):
         for _, q in review_qs.iterrows():
             if not task_exists(tasks_df, today_str, q["question_id"]):
                 new_rows.append([
+                    user_id,
                     today_str,
                     int(q["question_id"]),
                     "復習",
@@ -975,6 +976,7 @@ def generate_today_tasks(materials_df, questions_df, tasks_df, sheets):
         for _, q in weak_qs.iterrows():
             if not task_exists(tasks_df, today_str, q["question_id"]):
                 new_rows.append([
+                    user_id,
                     today_str,
                     int(q["question_id"]),
                     "苦手復習",
@@ -1002,13 +1004,14 @@ def generate_today_tasks(materials_df, questions_df, tasks_df, sheets):
 
         for _, q in new_qs.iterrows():
             if not task_exists(tasks_df, today_str, q["question_id"]):
-                new_rows.append([
+               new_rows.append([
+                    user_id,
                     today_str,
                     int(q["question_id"]),
                     "新規",
                     3,
                     "未完了"
-                ])
+                ]) 
 
     if new_rows:
         sheets["daily_tasks"].append_rows(new_rows)
@@ -1989,10 +1992,11 @@ with tab_today:
                 live = load_all_data_live(sheets)
 
                 count = generate_today_tasks(
-                    live["materials_df"],
-                    live["questions_df"],
-                    live["tasks_df"],
-                    sheets
+                    live["materials_df"][live["materials_df"]["user_id"].astype(str) == user_id].copy(),
+                    live["questions_df"][live["questions_df"]["user_id"].astype(str) == user_id].copy(),
+                    live["tasks_df"][live["tasks_df"]["user_id"].astype(str) == user_id].copy(),
+                    sheets,
+                    user_id
                 )
 
                 if count == 0:
@@ -2168,6 +2172,7 @@ with tab_today:
                         priority = priority_map.get(manual_task_type, 3)
 
                         sheets["daily_tasks"].append_row([
+                            user_id,
                             today_str,
                             int(qid),
                             manual_task_type,
