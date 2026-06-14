@@ -2421,11 +2421,42 @@ with tab_today:
                                 key=f"today_comment_{question_id}_{task_type}"
                             )
 
+                            issue = st.text_input(
+                                "論点",
+                                value=safe_str(row.get("issue", "")),
+                                placeholder="例：確率密度、モーメント母関数",
+                                key=f"today_issue_{question_id}_{task_type}"
+                            )
+
+                            tags = st.text_input(
+                                "タグ・関連過去問",
+                                value=safe_str(row.get("tags", "")),
+                                placeholder="例：確率統計, 重要, 要復習",
+                                key=f"today_tags_{question_id}_{task_type}"
+                            )
+
+                            user_note = st.text_area(
+                                "問題メモ",
+                                value=safe_str(row.get("user_note", "")),
+                                placeholder="例：sinの積分とモーメント母関数の関係に注意",
+                                key=f"today_user_note_{question_id}_{task_type}"
+                            )
+
                             if st.button(
                                 "保存",
                                 key=f"today_save_{question_id}_{task_type}",
                                 use_container_width=True
                             ):
+                                update_question_row(
+                                    sheets["questions"],
+                                    questions_df,
+                                    question_id,
+                                    {
+                                         "issue": issue,
+                                         "tags": tags,
+                                        "user_note": user_note,
+                                    }
+                                )
                                 save_learning_log(
                                     sheets=sheets,
                                     logs_df=logs_df,
