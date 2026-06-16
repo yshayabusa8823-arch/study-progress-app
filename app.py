@@ -2219,6 +2219,8 @@ with tab_today:
         hide_done=True
     )
 
+    
+
     if all_today_tasks_df.empty:
         st.info("今日のタスクはまだありません。上のボタンで作成できます。")
     else:
@@ -2243,465 +2245,542 @@ with tab_today:
 
         if today_tasks_df.empty:
             st.success("今日のタスクは全部完了！すごい！🎉")
+
         else:
             task_type_order = ["復習", "苦手復習", "やり直し", "新規"]
 
-            for group_type in task_type_order:
-                group_df = today_tasks_df[
-                    today_tasks_df["task_type"].astype(str) == group_type
+            today_tasks_df["表示科目"] = (
+                today_tasks_df["教材"]
+                .astype(str)
+                .str.split("｜")
+                .str[0]
+            )
+
+            subjects = sorted(
+                today_tasks_df["表示科目"]
+                .dropna()
+                .unique()
+                .tolist()
+            )
+
+            for subject in subjects:
+                subject_df = today_tasks_df[
+                    today_tasks_df["表示科目"].astype(str) == subject
                 ]
 
-                if group_df.empty:
+                if subject_df.empty:
                     continue
 
-                st.markdown(
-                    f'<div class="group-title">📌 {group_type}</div>',
-                    unsafe_allow_html=True
+                with st.expander(
+                    f"📚 {subject}：{len(subject_df)}件",
+                    expanded=False
+                ):
+                    for group_type in task_type_order:
+                        group_df = subject_df[
+                            subject_df["task_type"].astype(str) == group_type
+                        ]
+
+                        if group_df.empty:
+                            continue
+
+                        st.markdown(
+                            f'<div class="group-title">📌 {group_type}</div>',
+                            unsafe_allow_html=True
+                        )
+
+                        for _, row in group_df.iterrows():
+                            question_id = row["question_id"]
+                            task_type = row.get("task_type", "")
+                            task_status = row.get("status_task", row.get("status", "未完了"))
+                            question_status = row.get("status_question", "")
+
+                            material_label = safe_str(row.get("教材", ""))
+                            qnum = int(row["question_number"]) if not pd.isna(row["question_number"]) else ""
+
+                            with st.container(border=True):
+                                subject_name = safe_str(row.get("表示科目", ""))
+                                style = subject_style(subject_name)
+
+                                card_html = f"""
+                                <div class="task-card" style="
+                                    padding:1rem;
+                                    border-radius:22px;
+                                    margin-bottom:0.8rem;
+                                    border-left:8px solid {style['border']};
+                                    background:{style['bg']};
+                                    box-shadow:0 14px 32px rgba(15,23,42,0.08);
+                                ">
+                                    <div style="
+                                        display:inline-block;
+                                        padding:0.25rem 0.75rem;
+                                        border-radius:999px;
+                                        font-weight:900;
+                                        margin-bottom:0.5rem;
+                                        background:{style['badge_bg']};
+                                        color:{style['badge_text']};
+                                    ">
+                                        {subject_name}
+                                    </div>
+
+                                    <div style="
+                                        font-size:1.35rem;
+                                        font-weight:900;
+                                        color:#7c2d12;
+                                        line-height:1.35;
+                                        margin-bottom:0.7rem;
+                                    ">
+                                        {material_label}<br>第{qnum}問
+                                    </div>
+
+                                    <span style="
+                                        display:inline-block;
+                                        padding:0.24rem 0.72rem;
+                                        border-radius:999px;
+                                        background:#fff1f2;
+                                        border:1px solid #fecdd3;
+                                        color:#9f1239;
+                                        margin-right:0.3rem;
+                                        margin-bottom:0.3rem;
+                                        font-size:0.85rem;
+                                        font-weight:750;
+                                    ">種類：{task_type}</span>
+
+                                    <span style="
+                                        display:inline-block;
+                                        padding:0.24rem 0.72rem;
+                                        border-radius:999px;
+                                        background:#fff1f2;
+                                        border:1px solid #fecdd3;
+                                        color:#9f1239;
+                                        margin-right:0.3rem;
+                                        margin-bottom:0.3rem;
+                                        font-size:0.85rem;
+                                        font-weight:750;
+                                    ">タスク：{task_status}</span>
+
+                                    <span style="
+                                        display:inline-block;
+                                        padding:0.24rem 0.72rem;
+                                        border-radius:999px;
+                                        background:#fff1f2;
+                                        border:1px solid #fecdd3;
+                                        color:#9f1239;
+                                        margin-right:0.3rem;
+                                        margin-bottom:0.3rem;
+                                        font-size:0.85rem;
+                                        font-weight:750;
+                                    ">問題：{question_status}</span>
+                                </div>
+                                """
+
+                                st.html(card_html)
+
+                                if st.button(
+                                    "⏭ スキップ",
+                                    key=f"skip_task_{question_id}_{task_type}",
+                                    use_container_width=True
+                                ):
+                                    update_task_status(
+                                        sheets["daily_tasks"],
+                                        tasks_df,
+                                        str(today_jst()),
+                                        question_id,
+                                        task_type,
+                                        "スキップ"
+                                    )
+                                    refresh_data_and_rerun()
+
+                                issue = safe_str(row.get("issue", ""))
+                                tags = safe_str(row.get("tags", ""))
+                                user_note = safe_str(row.get("user_note", ""))
+
+                                if issue:
+                                    st.write(f"**論点：** {issue}")
+                                if tags:
+                                    st.write(f"**タグ：** {tags}")
+                                if user_note:
+                                    st.write(f"**メモ：** {user_note}")
+
+                                with st.expander("このタスクを編集する"):
+                                    task_type_options = ["新規", "復習", "苦手復習", "やり直し"]
+                                    status_options_task = ["未完了", "完了", "スキップ"]
+
+                                    edited_task_type = st.selectbox(
+                                        "タスク種別",
+                                        task_type_options,
+                                        index=task_type_options.index(task_type)
+                                        if task_type in task_type_options else 0,
+                                        key=f"edit_task_type_{question_id}_{task_type}"
+                                    )
+
+                                    edited_priority = st.number_input(
+                                        "優先度",
+                                        min_value=1,
+                                        max_value=99,
+                                        value=safe_int(row.get("priority", 3), 3),
+                                        key=f"edit_priority_{question_id}_{task_type}"
+                                    )
+
+                                    edited_task_status = st.selectbox(
+                                        "タスク状態",
+                                        status_options_task,
+                                        index=status_options_task.index(task_status)
+                                        if task_status in status_options_task else 0,
+                                        key=f"edit_task_status_{question_id}_{task_type}"
+                                    )
+
+                                    if st.button(
+                                        "タスク情報を保存",
+                                        key=f"save_task_edit_{question_id}_{task_type}",
+                                        use_container_width=True
+                                    ):
+                                        ok = update_task_row(
+                                            sheets["daily_tasks"],
+                                            tasks_df,
+                                            str(today_jst()),
+                                            question_id,
+                                            task_type,
+                                            {
+                                                "task_type": edited_task_type,
+                                                "priority": int(edited_priority),
+                                                "status": edited_task_status
+                                            }
+                                        )
+
+                                        if ok:
+                                            st.success("タスク情報を更新しました。")
+                                            refresh_data_and_rerun()
+                                        else:
+                                            st.error("更新対象が見つかりませんでした。")
+
+                                with st.expander("この問題を記録する"):
+                                    result = st.selectbox(
+                                        "結果",
+                                        ["完璧", "微妙", "苦手", "未完了"],
+                                        key=f"today_result_{question_id}_{task_type}"
+                                    )
+
+                                    difficulty = st.slider(
+                                        "難易度",
+                                        1,
+                                        5,
+                                        int(row.get("difficulty", 3)) if str(row.get("difficulty", 3)).isdigit() else 3,
+                                        key=f"today_diff_{question_id}_{task_type}"
+                                    )
+
+                                    study_minutes = st.number_input(
+                                        "学習時間（分）",
+                                        min_value=0,
+                                        step=5,
+                                        key=f"today_min_{question_id}_{task_type}"
+                                    )
+
+                                    comment = st.text_area(
+                                        "コメント",
+                                        placeholder="例：規範は覚えていたが、あてはめが薄かった",
+                                        key=f"today_comment_{question_id}_{task_type}"
+                                    )
+
+                                    issue_input = st.text_input(
+                                        "論点",
+                                        value=safe_str(row.get("issue", "")),
+                                        placeholder="例：確率密度、モーメント母関数",
+                                        key=f"today_issue_{question_id}_{task_type}"
+                                    )
+
+                                    tags_input = st.text_input(
+                                        "タグ・関連過去問",
+                                        value=safe_str(row.get("tags", "")),
+                                        placeholder="例：確率統計, 重要, 要復習",
+                                        key=f"today_tags_{question_id}_{task_type}"
+                                    )
+
+                                    user_note_input = st.text_area(
+                                        "問題メモ",
+                                        value=safe_str(row.get("user_note", "")),
+                                        placeholder="例：sinの積分とモーメント母関数の関係に注意",
+                                        key=f"today_user_note_{question_id}_{task_type}"
+                                    )
+
+                                    if st.button(
+                                        "保存",
+                                        key=f"today_save_{question_id}_{task_type}",
+                                        use_container_width=True
+                                    ):
+                                        update_question_row(
+                                            sheets["questions"],
+                                            questions_df,
+                                            question_id,
+                                            {
+                                                "issue": issue_input,
+                                                "tags": tags_input,
+                                                "user_note": user_note_input,
+                                            }
+                                        )
+
+                                        save_learning_log(
+                                            sheets=sheets,
+                                            logs_df=logs_df,
+                                            questions_df=questions_df,
+                                            tasks_df=tasks_df,
+                                            question_id=question_id,
+                                            task_type=task_type,
+                                            result=result,
+                                            difficulty=difficulty,
+                                            study_minutes=study_minutes,
+                                            comment=comment
+                                        )
+
+                                        show_result_effect(result)
+
+                                    if st.button(
+                                        "このタスクを削除",
+                                        key=f"today_delete_{question_id}_{task_type}",
+                                        use_container_width=True
+                                    ):
+                                        ok = delete_task(
+                                            sheets["daily_tasks"],
+                                            tasks_df,
+                                            str(today_jst()),
+                                            question_id,
+                                            task_type
+                                        )
+
+                                        if ok:
+                                            st.warning("タスクを削除しました。")
+                                            refresh_data_and_rerun()
+                                        else:
+                                            st.error("削除対象が見つかりませんでした。")
+
+            st.divider()
+            st.markdown("### ⏭ スキップ中のタスク")
+
+            skipped_tasks_df = tasks_df[
+                tasks_df["status"].astype(str) == "スキップ"
+            ].copy()
+
+            if skipped_tasks_df.empty:
+                st.info("スキップ中のタスクはありません。")
+            else:
+                skipped_merged = skipped_tasks_df.merge(
+                    questions_df,
+                    on="question_id",
+                    how="left",
+                    suffixes=("_task", "_question")
                 )
 
-                for _, row in group_df.iterrows():
+                skipped_merged["教材"] = skipped_merged["material_id"].apply(
+                    lambda x: get_material_name(materials_df, x)
+                )
+
+                skipped_merged["question_number"] = pd.to_numeric(
+                    skipped_merged["question_number"],
+                    errors="coerce"
+                )
+
+                skipped_merged = skipped_merged.sort_values(
+                    ["task_date", "教材", "question_number"]
+                )
+
+                for _, row in skipped_merged.iterrows():
                     question_id = row["question_id"]
-                    task_type = row.get("task_type", "")
-                    task_status = row.get("status_task", row.get("status", "未完了"))
-                    question_status = row.get("status_question", "")
+                    task_type = row["task_type"]
+                    original_date = safe_str(row.get("task_date", ""))
 
                     material_label = safe_str(row.get("教材", ""))
-                    qnum = int(row["question_number"]) if not pd.isna(row["question_number"]) else ""
+                    qnum = (
+                        int(row["question_number"])
+                        if not pd.isna(row["question_number"])
+                        else ""
+                    )
 
-                    with st.container(border=True):
-                        subject_name = safe_str(row.get("subject", ""))
-                        style = subject_style(subject_name)
-
-                        subject_name = safe_str(row.get("subject", ""))
-                        style = subject_style(subject_name)
-
-                        card_html = f"""
-                        <div class="task-card" style="
-                            padding:1rem;
-                            border-radius:22px;
-                            margin-bottom:0.8rem;
-                            border-left:8px solid {style['border']};
-                            background:{style['bg']};
-                            box-shadow:0 14px 32px rgba(15,23,42,0.08);
-                        ">
-                            <div style="
-                                display:inline-block;
-                                padding:0.25rem 0.75rem;
-                                border-radius:999px;
-                                font-weight:900;
-                                margin-bottom:0.5rem;
-                                background:{style['badge_bg']};
-                                color:{style['badge_text']};
-                            ">
-                                {subject_name}
+                    st.markdown(
+                        f"""
+                        <div class="sub-card">
+                            <div class="sub-card-title">
+                                ⏭ {material_label} 第{qnum}問
                             </div>
-
-                            <div style="
-                                font-size:1.35rem;
-                                font-weight:900;
-                                color:#7c2d12;
-                                line-height:1.35;
-                                margin-bottom:0.7rem;
-                            ">
-                                {material_label}<br>第{qnum}問
+                            <div class="sub-card-text">
+                                元の日付：{original_date}<br>
+                                種類：{task_type}
                             </div>
-
-                            <span style="
-                                display:inline-block;
-                                padding:0.24rem 0.72rem;
-                                border-radius:999px;
-                                background:#fff1f2;
-                                border:1px solid #fecdd3;
-                                color:#9f1239;
-                                margin-right:0.3rem;
-                                margin-bottom:0.3rem;
-                                font-size:0.85rem;
-                                font-weight:750;
-                            ">種類：{task_type}</span>
-
-                            <span style="
-                                display:inline-block;
-                                padding:0.24rem 0.72rem;
-                                border-radius:999px;
-                                background:#fff1f2;
-                                border:1px solid #fecdd3;
-                                color:#9f1239;
-                                margin-right:0.3rem;
-                                margin-bottom:0.3rem;
-                                font-size:0.85rem;
-                                font-weight:750;
-                            ">タスク：{task_status}</span>
-
-                            <span style="
-                                display:inline-block;
-                                padding:0.24rem 0.72rem;
-                                border-radius:999px;
-                                background:#fff1f2;
-                                border:1px solid #fecdd3;
-                                color:#9f1239;
-                                margin-right:0.3rem;
-                                margin-bottom:0.3rem;
-                                font-size:0.85rem;
-                                font-weight:750;
-                            ">問題：{question_status}</span>
                         </div>
-                        """
+                        """,
+                        unsafe_allow_html=True
+                    )
 
-                        st.html(card_html)
+                    if st.button(
+                        "今日のタスクに戻す",
+                        key=f"restore_skipped_{original_date}_{question_id}_{task_type}",
+                        use_container_width=True
+                    ):
+                        update_task_row(
+                            sheets["daily_tasks"],
+                            tasks_df,
+                            original_date,
+                            question_id,
+                            task_type,
+                            {
+                                "task_date": str(today_jst()),
+                                "status": "未完了"
+                            }
+                        )
 
-                        if st.button(
-                            "⏭ スキップ",
-                            key=f"skip_task_{question_id}_{task_type}"
-                        ):
-                            update_task_status(
-                                sheets["daily_tasks"],
-                                tasks_df,
-                                str(today_jst()),
-                                question_id,
-                                task_type,
-                                "スキップ"
-                            )
+                        st.success("今日のタスクに戻しました！")
+                        refresh_data_and_rerun()
 
-                            refresh_data_and_rerun()
+            st.divider()
+            st.markdown("## 🌙 明日の予定プレビュー")
+            st.caption("今日の記録・教材の曜日設定・未着手問題から、明日やる予定を先読みします。")
 
-                        issue = safe_str(row.get("issue", ""))
+            tomorrow_preview_df = build_tomorrow_preview_df(materials_df, questions_df, tasks_df)
 
-                        issue = safe_str(row.get("issue", ""))
-                        tags = safe_str(row.get("tags", ""))
-                        user_note = safe_str(row.get("user_note", ""))
+            if tomorrow_preview_df.empty:
+                st.info("明日の予定はまだありません。")
+            else:
+                task_type_order = ["復習", "苦手復習", "やり直し", "新規"]
 
-                        if issue:
-                            st.write(f"**論点：** {issue}")
-                        if tags:
-                            st.write(f"**タグ：** {tags}")
-                        if user_note:
-                            st.write(f"**メモ：** {user_note}")
-
-                        skip_col1, skip_col2 = st.columns([1, 2])
-
-                        
-
-  
-
-                        with st.expander("このタスクを編集する"):
-                            task_type_options = ["新規", "復習", "苦手復習", "やり直し"]
-                            status_options_task = ["未完了", "完了", "スキップ"]
-
-                            edited_task_type = st.selectbox(
-                                "タスク種別",
-                                task_type_options,
-                                index=task_type_options.index(task_type)
-                                if task_type in task_type_options else 0,
-                                key=f"edit_task_type_{question_id}_{task_type}"
-                            )
-
-                            edited_priority = st.number_input(
-                                "優先度",
-                                min_value=1,
-                                max_value=99,
-                                value=safe_int(row.get("priority", 3), 3),
-                                key=f"edit_priority_{question_id}_{task_type}"
-                            )
-
-                            edited_task_status = st.selectbox(
-                                "タスク状態",
-                                status_options_task,
-                                index=status_options_task.index(task_status)
-                                if task_status in status_options_task else 0,
-                                key=f"edit_task_status_{question_id}_{task_type}"
-                            )
-
-                            if st.button(
-                                "タスク情報を保存",
-                                key=f"save_task_edit_{question_id}_{task_type}",
-                                use_container_width=True
-                            ):
-                                ok = update_task_row(
-                                    sheets["daily_tasks"],
-                                    tasks_df,
-                                    str(today_jst()),
-                                    question_id,
-                                    task_type,
-                                    {
-                                        "task_type": edited_task_type,
-                                        "priority": int(edited_priority),
-                                        "status": edited_task_status
-                                    }
-                                )
-
-                                if ok:
-                                    st.success("タスク情報を更新しました。")
-                                    refresh_data_and_rerun()
-                                else:
-                                    st.error("更新対象が見つかりませんでした。")
-
-                        with st.expander("この問題を記録する"):
-                            result = st.selectbox(
-                                "結果",
-                                ["完璧", "微妙", "苦手", "未完了"],
-                                key=f"today_result_{question_id}_{task_type}"
-                            )
-
-                            difficulty = st.slider(
-                                "難易度",
-                                1,
-                                5,
-                                int(row.get("difficulty", 3)) if str(row.get("difficulty", 3)).isdigit() else 3,
-                                key=f"today_diff_{question_id}_{task_type}"
-                            )
-
-                            study_minutes = st.number_input(
-                                "学習時間（分）",
-                                min_value=0,
-                                step=5,
-                                key=f"today_min_{question_id}_{task_type}"
-                            )
-
-                            comment = st.text_area(
-                                "コメント",
-                                placeholder="例：規範は覚えていたが、あてはめが薄かった",
-                                key=f"today_comment_{question_id}_{task_type}"
-                            )
-
-                            issue = st.text_input(
-                                "論点",
-                                value=safe_str(row.get("issue", "")),
-                                placeholder="例：確率密度、モーメント母関数",
-                                key=f"today_issue_{question_id}_{task_type}"
-                            )
-
-                            tags = st.text_input(
-                                "タグ・関連過去問",
-                                value=safe_str(row.get("tags", "")),
-                                placeholder="例：確率統計, 重要, 要復習",
-                                key=f"today_tags_{question_id}_{task_type}"
-                            )
-
-                            user_note = st.text_area(
-                                "問題メモ",
-                                value=safe_str(row.get("user_note", "")),
-                                placeholder="例：sinの積分とモーメント母関数の関係に注意",
-                                key=f"today_user_note_{question_id}_{task_type}"
-                            )
-
-                            if st.button(
-                                "保存",
-                                key=f"today_save_{question_id}_{task_type}",
-                                use_container_width=True
-                            ):
-                                update_question_row(
-                                    sheets["questions"],
-                                    questions_df,
-                                    question_id,
-                                    {
-                                         "issue": issue,
-                                         "tags": tags,
-                                        "user_note": user_note,
-                                    }
-                                )
-                                save_learning_log(
-                                    sheets=sheets,
-                                    logs_df=logs_df,
-                                    questions_df=questions_df,
-                                    tasks_df=tasks_df,
-                                    question_id=question_id,
-                                    task_type=task_type,
-                                    result=result,
-                                    difficulty=difficulty,
-                                    study_minutes=study_minutes,
-                                    comment=comment
-                                )
-
-                                show_result_effect(result)
-
-                            if st.button(
-                                "このタスクを削除",
-                                key=f"today_delete_{question_id}_{task_type}",
-                                use_container_width=True
-                            ):
-                                ok = delete_task(
-                                    sheets["daily_tasks"],
-                                    tasks_df,
-                                    str(today_jst()),
-                                    question_id,
-                                    task_type
-                                )
-
-                                if ok:
-                                    st.warning("タスクを削除しました。")
-                                    refresh_data_and_rerun()
-                                else:
-                                    st.error("削除対象が見つかりませんでした。")
-
-    st.divider()
-    st.markdown("### ⏭ スキップ中のタスク")
-
-    skipped_tasks_df = tasks_df[
-        tasks_df["status"].astype(str) == "スキップ"
-    ].copy()
-
-    if skipped_tasks_df.empty:
-        st.info("スキップ中のタスクはありません。")
-    else:
-        skipped_merged = skipped_tasks_df.merge(
-            questions_df,
-            on="question_id",
-            how="left",
-            suffixes=("_task", "_question")
-        )
-
-        skipped_merged["教材"] = skipped_merged["material_id"].apply(
-            lambda x: get_material_name(materials_df, x)
-        )
-
-        skipped_merged["question_number"] = pd.to_numeric(
-            skipped_merged["question_number"],
-            errors="coerce"
-        )
-
-        skipped_merged = skipped_merged.sort_values(
-            ["task_date", "教材", "question_number"]
-        )
-
-        for _, row in skipped_merged.iterrows():
-            question_id = row["question_id"]
-            task_type = row["task_type"]
-            original_date = safe_str(row.get("task_date", ""))
-
-            material_label = safe_str(row.get("教材", ""))
-            qnum = (
-                int(row["question_number"])
-                if not pd.isna(row["question_number"])
-                else ""
-            )
-
-            st.markdown(
-                f"""
-                <div class="sub-card">
-                    <div class="sub-card-title">
-                        ⏭ {material_label} 第{qnum}問
-                    </div>
-                    <div class="sub-card-text">
-                        元の日付：{original_date}<br>
-                        種類：{task_type}
-                    </div>
-                </div>
-                """,
-                unsafe_allow_html=True
-            )
-
-            if st.button(
-                "今日のタスクに戻す",
-                key=f"restore_skipped_{original_date}_{question_id}_{task_type}",
-                use_container_width=True
-            ):
-                update_task_row(
-                    sheets["daily_tasks"],
-                    tasks_df,
-                    original_date,
-                    question_id,
-                    task_type,
-                    {
-                        "task_date": str(today_jst()),
-                        "status": "未完了"
-                    }
+                today_tasks_df["表示科目"] = (
+                    today_tasks_df["教材"]
+                    .astype(str)
+                    .str.split("｜")
+                    .str[0]
                 )
 
-                st.success("今日のタスクに戻しました！")
-                refresh_data_and_rerun()
+                subjects = sorted(
+                    today_tasks_df["表示科目"]
+                    .dropna()
+                    .unique()
+                    .tolist()
+                )
 
-    st.divider()
-    st.markdown("## 🌙 明日の予定プレビュー")
-    st.caption("今日の記録・教材の曜日設定・未着手問題から、明日やる予定を先読みします。")
+                for subject in subjects:
+                    subject_df = today_tasks_df[
+                        today_tasks_df["表示科目"].astype(str) == subject
+                    ]
 
-    tomorrow_preview_df = build_tomorrow_preview_df(materials_df, questions_df, tasks_df)
+                    if subject_df.empty:
+                        continue
 
-    if tomorrow_preview_df.empty:
-        st.info("明日の予定はまだありません。")
-    else:
-        task_type_order = ["復習予定", "苦手復習予定", "新規予定"]
+                    with st.expander(
+                        f"📚 {subject}：{len(subject_df)}件",
+                        expanded=False
+                    ):
+                        for group_type in task_type_order:
+                            group_df = subject_df[
+                                subject_df["task_type"].astype(str) == group_type
+                            ]
 
-        for group_type in task_type_order:
-            group_df = tomorrow_preview_df[
-                tomorrow_preview_df["task_type"].astype(str) == group_type
-            ]
+                            if group_df.empty:
+                                continue
 
-            if group_df.empty:
-                continue
+                            st.markdown(
+                                f'<div class="group-title">📌 {group_type}</div>',
+                                unsafe_allow_html=True
+                            )
 
-            st.markdown(
-                f'<div class="group-title">📌 {group_type}</div>',
-                unsafe_allow_html=True
-            )
+                    for _, row in group_df.iterrows():
+                        question_id = row["question_id"]
+                        task_type = row.get("task_type", "")
+                        task_status = row.get("status_task", row.get("status", "未完了"))
+                        question_status = row.get("status_question", "")
 
-            for _, row in group_df.iterrows():
-                material_label = safe_str(row.get("教材", ""))
-                qnum = int(row["question_number"]) if not pd.isna(row["question_number"]) else ""
+                        material_label = safe_str(row.get("教材", ""))
+                        qnum = (
+                            int(row["question_number"])
+                            if not pd.isna(row["question_number"])
+                            else ""
+                        )
 
-                with st.container(border=True):
-                    subject_name = safe_str(row.get("subject", ""))
-                    style = subject_style(subject_name)
+                        with st.container(border=True):
+                            subject_name = safe_str(row.get("表示科目", ""))
+                            style = subject_style(subject_name)
 
-                    card_html = f"""
-                    <div style="
-                        padding:1rem;
-                        border-radius:22px;
-                        margin-bottom:0.8rem;
-                        border-left:8px solid {style['border']};
-                        background:{style['bg']};
-                        box-shadow:0 14px 32px rgba(15,23,42,0.08);
-                    ">
-                        <div style="
-                            display:inline-block;
-                            padding:0.25rem 0.75rem;
-                            border-radius:999px;
-                            font-weight:900;
-                            margin-bottom:0.5rem;
-                            background:{style['badge_bg']};
-                            color:{style['badge_text']};
-                        ">
-                            {subject_name}
-                        </div>
+                            card_html = f"""
+                            <div class="task-card" style="
+                                padding:1rem;
+                                border-radius:22px;
+                                margin-bottom:0.8rem;
+                                border-left:8px solid {style['border']};
+                                background:{style['bg']};
+                                box-shadow:0 14px 32px rgba(15,23,42,0.08);
+                            ">
+                                <div style="
+                                    display:inline-block;
+                                    padding:0.25rem 0.75rem;
+                                    border-radius:999px;
+                                    font-weight:900;
+                                    margin-bottom:0.5rem;
+                                    background:{style['badge_bg']};
+                                    color:{style['badge_text']};
+                                ">
+                                    {subject_name}
+                                </div>
 
-                        <div style="
-                            font-size:1.35rem;
-                            font-weight:900;
-                            color:#7c2d12;
-                            line-height:1.35;
-                            margin-bottom:0.7rem;
-                        ">
-                            {material_label}<br>第{qnum}問
-                        </div>
+                                <div style="
+                                    font-size:1.35rem;
+                                    font-weight:900;
+                                    color:#7c2d12;
+                                    line-height:1.35;
+                                    margin-bottom:0.7rem;
+                                ">
+                                    {material_label}<br>第{qnum}問
+                                </div>
 
-                        <span style="
-                            display:inline-block;
-                    　      padding:0.24rem 0.72rem;
-                            border-radius:999px;
-                            background:#fff1f2;
-                            border:1px solid #fecdd3;
-                            color:#9f1239;
-                            margin-right:0.3rem;
-                            margin-bottom:0.3rem;
-                            font-size:0.85rem;
-                            font-weight:750;
-                        ">
-                            種類：{group_type}
-                        </span>
-                    </div>
-                    """
+                                <span style="
+                                    display:inline-block;
+                                    padding:0.24rem 0.72rem;
+                                    border-radius:999px;
+                                    background:#fff1f2;
+                                    border:1px solid #fecdd3;
+                                    color:#9f1239;
+                                    margin-right:0.3rem;
+                                    margin-bottom:0.3rem;
+                                    font-size:0.85rem;
+                                    font-weight:750;
+                                ">種類：{task_type}</span>
 
-                    st.html(card_html)                                     
+                                <span style="
+                                    display:inline-block;
+                                    padding:0.24rem 0.72rem;
+                                    border-radius:999px;
+                                    background:#fff1f2;
+                                    border:1px solid #fecdd3;
+                                    color:#9f1239;
+                                    margin-right:0.3rem;
+                                    margin-bottom:0.3rem;
+                                    font-size:0.85rem;
+                                    font-weight:750;
+                                ">タスク：{task_status}</span>
 
-                    issue = safe_str(row.get("issue", ""))
-                    tags = safe_str(row.get("tags", ""))
-                    user_note = safe_str(row.get("user_note", ""))
+                                <span style="
+                                    display:inline-block;
+                                    padding:0.24rem 0.72rem;
+                                    border-radius:999px;
+                                    background:#fff1f2;
+                                    border:1px solid #fecdd3;
+                                    color:#9f1239;
+                                    margin-right:0.3rem;
+                                    margin-bottom:0.3rem;
+                                    font-size:0.85rem;
+                                    font-weight:750;
+                                ">問題：{question_status}</span>
+                            </div>
+                            """
 
-                    if issue:
-                        st.write(f"**論点：** {issue}")
-                    if tags:
-                        st.write(f"**タグ：** {tags}")
-                    if user_note:
-                        st.write(f"**メモ：** {user_note}")
+                            st.html(card_html)
+
+                            issue = safe_str(row.get("issue", ""))
+                            tags = safe_str(row.get("tags", ""))
+                            user_note = safe_str(row.get("user_note", ""))
+
+                            if issue:
+                                st.write(f"**論点：** {issue}")
+                            if tags:
+                                st.write(f"**タグ：** {tags}")
+                            if user_note:
+                                st.write(f"**メモ：** {user_note}")
+
 
 
 # =====================
