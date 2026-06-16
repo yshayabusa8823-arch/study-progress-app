@@ -929,6 +929,11 @@ def generate_today_tasks(materials_df, questions_df, tasks_df, sheets, user_id):
     today = today_jst()
     today_str = str(today)
     new_rows = []
+    skipped_question_ids = set(
+        tasks_df[
+            tasks_df["status"].astype(str) == "スキップ"
+        ]["question_id"].astype(str)
+    )
 
     if materials_df.empty or questions_df.empty:
         return 0
@@ -942,6 +947,10 @@ def generate_today_tasks(materials_df, questions_df, tasks_df, sheets, user_id):
 
         qs = questions_df[
             questions_df["material_id"].astype(str) == str(material_id)
+        ].copy()
+
+        qs = qs[
+            ~qs["question_id"].astype(str).isin(skipped_question_ids)
         ].copy()
 
         if qs.empty:
@@ -1031,7 +1040,7 @@ def build_tasks_df_for_date(tasks_df, questions_df, materials_df, target_date, h
 
     if hide_done and "status" in target_tasks.columns:
         target_tasks = target_tasks[
-            target_tasks["status"].astype(str) != "完了"
+            ~target_tasks["status"].astype(str).isin(["完了", "スキップ"])
         ]
 
     if target_tasks.empty:
@@ -1075,11 +1084,17 @@ def build_today_tasks_df(tasks_df, questions_df, materials_df, hide_done=False):
     )
 
 
-def build_tomorrow_preview_df(materials_df, questions_df):
+def build_tomorrow_preview_df(materials_df, questions_df, tasks_df):
     tomorrow = today_jst() + timedelta(days=1)
     tomorrow_str = str(tomorrow)
     tomorrow_weekday = WEEKDAY_MAP[tomorrow.weekday()]
     preview_rows = []
+
+    skipped_question_ids = set(
+        tasks_df[
+            tasks_df["status"].astype(str) == "スキップ"
+        ]["question_id"].astype(str)
+    )
 
     if materials_df.empty or questions_df.empty:
         return pd.DataFrame()
@@ -1090,6 +1105,10 @@ def build_tomorrow_preview_df(materials_df, questions_df):
 
         qs = questions_df[
             questions_df["material_id"].astype(str) == str(material_id)
+        ].copy()
+
+        qs = qs[
+            ~qs["question_id"].astype(str).isin(skipped_question_ids)
         ].copy()
 
         if qs.empty:
@@ -2330,6 +2349,23 @@ with tab_today:
 
                         st.html(card_html)
 
+                        if st.button(
+                            "⏭ スキップ",
+                            key=f"skip_task_{question_id}_{task_type}"
+                        ):
+                            update_task_status(
+                                sheets["daily_tasks"],
+                                tasks_df,
+                                str(today_jst()),
+                                question_id,
+                                task_type,
+                                "スキップ"
+                            )
+
+                            refresh_data_and_rerun()
+
+                        issue = safe_str(row.get("issue", ""))
+
                         issue = safe_str(row.get("issue", ""))
                         tags = safe_str(row.get("tags", ""))
                         user_note = safe_str(row.get("user_note", ""))
@@ -2341,9 +2377,15 @@ with tab_today:
                         if user_note:
                             st.write(f"**メモ：** {user_note}")
 
+                        skip_col1, skip_col2 = st.columns([1, 2])
+
+                        
+
+  
+
                         with st.expander("このタスクを編集する"):
                             task_type_options = ["新規", "復習", "苦手復習", "やり直し"]
-                            status_options_task = ["未完了", "完了"]
+                            status_options_task = ["未完了", "完了", "スキップ"]
 
                             edited_task_type = st.selectbox(
                                 "タスク種別",
@@ -2492,10 +2534,87 @@ with tab_today:
                                     st.error("削除対象が見つかりませんでした。")
 
     st.divider()
+    st.markdown("### ⏭ スキップ中のタスク")
+
+    skipped_tasks_df = tasks_df[
+        tasks_df["status"].astype(str) == "スキップ"
+    ].copy()
+
+    if skipped_tasks_df.empty:
+        st.info("スキップ中のタスクはありません。")
+    else:
+        skipped_merged = skipped_tasks_df.merge(
+            questions_df,
+            on="question_id",
+            how="left",
+            suffixes=("_task", "_question")
+        )
+
+        skipped_merged["教材"] = skipped_merged["material_id"].apply(
+            lambda x: get_material_name(materials_df, x)
+        )
+
+        skipped_merged["question_number"] = pd.to_numeric(
+            skipped_merged["question_number"],
+            errors="coerce"
+        )
+
+        skipped_merged = skipped_merged.sort_values(
+            ["task_date", "教材", "question_number"]
+        )
+
+        for _, row in skipped_merged.iterrows():
+            question_id = row["question_id"]
+            task_type = row["task_type"]
+            original_date = safe_str(row.get("task_date", ""))
+
+            material_label = safe_str(row.get("教材", ""))
+            qnum = (
+                int(row["question_number"])
+                if not pd.isna(row["question_number"])
+                else ""
+            )
+
+            st.markdown(
+                f"""
+                <div class="sub-card">
+                    <div class="sub-card-title">
+                        ⏭ {material_label} 第{qnum}問
+                    </div>
+                    <div class="sub-card-text">
+                        元の日付：{original_date}<br>
+                        種類：{task_type}
+                    </div>
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+
+            if st.button(
+                "今日のタスクに戻す",
+                key=f"restore_skipped_{original_date}_{question_id}_{task_type}",
+                use_container_width=True
+            ):
+                update_task_row(
+                    sheets["daily_tasks"],
+                    tasks_df,
+                    original_date,
+                    question_id,
+                    task_type,
+                    {
+                        "task_date": str(today_jst()),
+                        "status": "未完了"
+                    }
+                )
+
+                st.success("今日のタスクに戻しました！")
+                refresh_data_and_rerun()
+
+    st.divider()
     st.markdown("## 🌙 明日の予定プレビュー")
     st.caption("今日の記録・教材の曜日設定・未着手問題から、明日やる予定を先読みします。")
 
-    tomorrow_preview_df = build_tomorrow_preview_df(materials_df, questions_df)
+    tomorrow_preview_df = build_tomorrow_preview_df(materials_df, questions_df, tasks_df)
 
     if tomorrow_preview_df.empty:
         st.info("明日の予定はまだありません。")
