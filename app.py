@@ -2638,25 +2638,25 @@ with tab_today:
             if tomorrow_preview_df.empty:
                 st.info("明日の予定はまだありません。")
             else:
-                task_type_order = ["復習", "苦手復習", "やり直し", "新規"]
+                task_type_order = ["復習予定", "苦手復習予定", "新規予定"]
 
-                today_tasks_df["表示科目"] = (
-                    today_tasks_df["教材"]
+                tomorrow_preview_df["表示科目"] = (
+                    tomorrow_preview_df["教材"]
                     .astype(str)
                     .str.split("｜")
                     .str[0]
                 )
 
                 subjects = sorted(
-                    today_tasks_df["表示科目"]
+                    tomorrow_preview_df["表示科目"]
                     .dropna()
                     .unique()
                     .tolist()
                 )
 
                 for subject in subjects:
-                    subject_df = today_tasks_df[
-                        today_tasks_df["表示科目"].astype(str) == subject
+                    subject_df = tomorrow_preview_df[
+                        tomorrow_preview_df["表示科目"].astype(str) == subject
                     ]
 
                     if subject_df.empty:
@@ -2679,107 +2679,85 @@ with tab_today:
                                 unsafe_allow_html=True
                             )
 
-                    for _, row in group_df.iterrows():
-                        question_id = row["question_id"]
-                        task_type = row.get("task_type", "")
-                        task_status = row.get("status_task", row.get("status", "未完了"))
-                        question_status = row.get("status_question", "")
+                            for _, row in group_df.iterrows():
+                                question_status = row.get("status", "")
+                                material_label = safe_str(row.get("教材", ""))
+                                qnum = int(row["question_number"]) if not pd.isna(row["question_number"]) else ""
 
-                        material_label = safe_str(row.get("教材", ""))
-                        qnum = (
-                            int(row["question_number"])
-                            if not pd.isna(row["question_number"])
-                            else ""
-                        )
+                                subject_name = safe_str(row.get("表示科目", ""))
+                                style = subject_style(subject_name)
 
-                        with st.container(border=True):
-                            subject_name = safe_str(row.get("表示科目", ""))
-                            style = subject_style(subject_name)
-
-                            card_html = f"""
-                            <div class="task-card" style="
-                                padding:1rem;
-                                border-radius:22px;
-                                margin-bottom:0.8rem;
-                                border-left:8px solid {style['border']};
-                                background:{style['bg']};
-                                box-shadow:0 14px 32px rgba(15,23,42,0.08);
-                            ">
-                                <div style="
-                                    display:inline-block;
-                                    padding:0.25rem 0.75rem;
-                                    border-radius:999px;
-                                    font-weight:900;
-                                    margin-bottom:0.5rem;
-                                    background:{style['badge_bg']};
-                                    color:{style['badge_text']};
+                                card_html = f"""
+                                <div class="task-card" style="
+                                    padding:1rem;
+                                    border-radius:22px;
+                                    margin-bottom:0.8rem;
+                                    border-left:8px solid {style['border']};
+                                    background:{style['bg']};
+                                    box-shadow:0 14px 32px rgba(15,23,42,0.08);
                                 ">
-                                    {subject_name}
+                                    <div style="
+                                        display:inline-block;
+                                        padding:0.25rem 0.75rem;
+                                        border-radius:999px;
+                                        font-weight:900;
+                                        margin-bottom:0.5rem;
+                                        background:{style['badge_bg']};
+                                        color:{style['badge_text']};
+                                    ">
+                                        {subject_name}
+                                    </div>
+
+                                    <div style="
+                                        font-size:1.35rem;
+                                        font-weight:900;
+                                        color:#7c2d12;
+                                        line-height:1.35;
+                                        margin-bottom:0.7rem;
+                                    ">
+                                        {material_label}<br>第{qnum}問
+                                    </div>
+
+                                    <span style="
+                                        display:inline-block;
+                                        padding:0.24rem 0.72rem;
+                                        border-radius:999px;
+                                        background:#fff1f2;
+                                        border:1px solid #fecdd3;
+                                        color:#9f1239;
+                                        margin-right:0.3rem;
+                                        margin-bottom:0.3rem;
+                                        font-size:0.85rem;
+                                        font-weight:750;
+                                    ">種類：{group_type}</span>
+
+                                    <span style="
+                                        display:inline-block;
+                                        padding:0.24rem 0.72rem;
+                                        border-radius:999px;
+                                        background:#fff1f2;
+                                        border:1px solid #fecdd3;
+                                        color:#9f1239;
+                                        margin-right:0.3rem;
+                                        margin-bottom:0.3rem;
+                                        font-size:0.85rem;
+                                        font-weight:750;
+                                    ">問題：{question_status}</span>
                                 </div>
+                                """
 
-                                <div style="
-                                    font-size:1.35rem;
-                                    font-weight:900;
-                                    color:#7c2d12;
-                                    line-height:1.35;
-                                    margin-bottom:0.7rem;
-                                ">
-                                    {material_label}<br>第{qnum}問
-                                </div>
+                                st.html(card_html)
 
-                                <span style="
-                                    display:inline-block;
-                                    padding:0.24rem 0.72rem;
-                                    border-radius:999px;
-                                    background:#fff1f2;
-                                    border:1px solid #fecdd3;
-                                    color:#9f1239;
-                                    margin-right:0.3rem;
-                                    margin-bottom:0.3rem;
-                                    font-size:0.85rem;
-                                    font-weight:750;
-                                ">種類：{task_type}</span>
+                                issue = safe_str(row.get("issue", ""))
+                                tags = safe_str(row.get("tags", ""))
+                                user_note = safe_str(row.get("user_note", ""))
 
-                                <span style="
-                                    display:inline-block;
-                                    padding:0.24rem 0.72rem;
-                                    border-radius:999px;
-                                    background:#fff1f2;
-                                    border:1px solid #fecdd3;
-                                    color:#9f1239;
-                                    margin-right:0.3rem;
-                                    margin-bottom:0.3rem;
-                                    font-size:0.85rem;
-                                    font-weight:750;
-                                ">タスク：{task_status}</span>
-
-                                <span style="
-                                    display:inline-block;
-                                    padding:0.24rem 0.72rem;
-                                    border-radius:999px;
-                                    background:#fff1f2;
-                                    border:1px solid #fecdd3;
-                                    color:#9f1239;
-                                    margin-right:0.3rem;
-                                    margin-bottom:0.3rem;
-                                    font-size:0.85rem;
-                                    font-weight:750;
-                                ">問題：{question_status}</span>
-                            </div>
-                            """
-
-                            st.html(card_html)
-
-                            issue = safe_str(row.get("issue", ""))
-                            tags = safe_str(row.get("tags", ""))
-                            user_note = safe_str(row.get("user_note", ""))
-
-                            if issue:
-                                st.write(f"**論点：** {issue}")
-                            if tags:
-                                st.write(f"**タグ：** {tags}")
-                            if user_note:
-                                st.write(f"**メモ：** {user_note}")
+                                if issue:
+                                    st.write(f"**論点：** {issue}")
+                                if tags:
+                                    st.write(f"**タグ：** {tags}")
+                                if user_note:
+                                    st.write(f"**メモ：** {user_note}")
 
 
 
