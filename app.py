@@ -319,6 +319,48 @@ def subject_style(subject):
             "badge_bg": "#fed7aa",
             "badge_text": "#9a3412",
         },
+
+                "線形代数": {
+            "border": "#2563eb",
+            "bg": "linear-gradient(135deg, #dbeafe, #ffffff)",
+            "badge_bg": "#bfdbfe",
+            "badge_text": "#1e3a8a",
+        },
+
+        "微分積分": {
+            "border": "#10b981",
+            "bg": "linear-gradient(135deg, #d1fae5, #ffffff)",
+            "badge_bg": "#a7f3d0",
+            "badge_text": "#065f46",
+        },
+
+        "確率統計": {
+            "border": "#8b5cf6",
+            "bg": "linear-gradient(135deg, #ede9fe, #ffffff)",
+            "badge_bg": "#ddd6fe",
+            "badge_text": "#5b21b6",
+        },
+
+        "プログラミング": {
+            "border": "#f97316",
+            "bg": "linear-gradient(135deg, #ffedd5, #ffffff)",
+            "badge_bg": "#fed7aa",
+            "badge_text": "#9a3412",
+        },
+
+        "英語": {
+            "border": "#ec4899",
+            "bg": "linear-gradient(135deg, #fce7f3, #ffffff)",
+            "badge_bg": "#fbcfe8",
+            "badge_text": "#9d174d",
+        },
+
+        "その他": {
+            "border": "#64748b",
+            "bg": "linear-gradient(135deg, #f1f5f9, #ffffff)",
+            "badge_bg": "#e2e8f0",
+            "badge_text": "#334155",
+        },
     }
 
     return styles.get(subject, {
@@ -337,6 +379,12 @@ def subject_color(subject):
         "商法": "#f3e8ff",
         "民事訴訟法": "#e0f2fe",
         "刑事訴訟法": "#fae8ff",
+        "線形代数": "#dbeafe",
+        "微分積分": "#d1fae5",
+        "確率統計": "#ede9fe",
+        "プログラミング": "#ffedd5",
+        "英語": "#fce7f3",
+        "その他": "#e2e8f0",
     }
     return colors.get(str(subject), "#f1f5f9")
 
@@ -1971,17 +2019,6 @@ with top_col1:
             unsafe_allow_html=True
         )
 
-    st.markdown(
-    f"""
-    <div class="sub-card">
-        <div class="sub-card-title">🧠 今日の学習分析</div>
-        <div class="sub-card-text">
-            {ai_ready_message}
-        </div>
-    </div>
-    """,
-    unsafe_allow_html=True
-)
 
 with top_col2:
     if st.button("🔄 更新", use_container_width=True):
@@ -2030,88 +2067,7 @@ with tab_today:
     with col_info:
         st.caption("復習・苦手問題・新規問題を自動で今日のタスクに入れます。")
 
-    st.divider()
-    st.markdown("### ↩️ 直前の記録を取り消す")
 
-    undo_df_now = undo_df.copy()
-    logs_df_now = logs_df.copy()
-    tasks_df_now = tasks_df.copy()
-    questions_df_now = questions_df.copy()
-
-    if undo_df_now.empty:
-        st.info("取り消せる操作はありません。")
-    else:
-        if "undone" not in undo_df_now.columns:
-            undo_df_now["undone"] = ""
-
-        available_undo = undo_df_now[
-            undo_df_now["undone"].astype(str) != "済"
-        ].copy()
-
-        if available_undo.empty:
-            st.info("取り消せる操作はありません。")
-        else:
-            latest = available_undo.tail(1).iloc[0]
-
-            target_q = questions_df_now[
-                questions_df_now["question_id"].astype(str) == str(latest["question_id"])
-            ]
-
-            if not target_q.empty:
-                target_q = target_q.iloc[0]
-                material_label = get_material_name(materials_df, target_q["material_id"])
-                question_label = f'{material_label} 第{target_q["question_number"]}問'
-            else:
-                question_label = f'問題ID {latest["question_id"]}'
-
-            st.warning(
-                f"直前の操作：{question_label} / {latest['task_type']} / {latest['created_at']}"
-            )
-
-            if st.button("この直前操作を取り消す", use_container_width=True):
-                try:
-                    prev_question = json.loads(latest["prev_question_json"])
-
-                    update_question_row(
-                        sheets["questions"],
-                        questions_df_now,
-                        latest["question_id"],
-                        {
-                            "status": prev_question.get("status", ""),
-                            "last_done_date": prev_question.get("last_done_date", ""),
-                            "next_review_date": prev_question.get("next_review_date", ""),
-                            "difficulty": prev_question.get("difficulty", ""),
-                            "round": prev_question.get("round", "")
-                        }
-                    )
-
-                    if safe_str(latest.get("prev_task_status", "")):
-                        update_task_status(
-                            sheets["daily_tasks"],
-                            tasks_df_now,
-                            latest["task_date"],
-                            latest["question_id"],
-                            latest["task_type"],
-                            latest["prev_task_status"]
-                        )
-
-                    delete_log_by_id(
-                        sheets["logs"],
-                        logs_df_now,
-                        latest["log_id"]
-                    )
-
-                    mark_undo_done(
-                        sheets["undo_actions"],
-                        undo_df_now,
-                        latest["action_id"]
-                    )
-
-                    st.success("一つ前の状態に戻しました。")
-                    refresh_data_and_rerun()
-
-                except Exception as e:
-                    st.error(f"取り消しに失敗しました：{e}")
 
     st.divider()
     st.markdown("### 好きな問題を今日に追加")
