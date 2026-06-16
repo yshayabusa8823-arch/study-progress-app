@@ -486,7 +486,7 @@ def delete_task(ws, tasks_df, task_date, question_id, task_type):
     if target.empty:
         return False
 
-    sheet_row = target.index[0] + 2
+    sheet_row = int(target.index[0]) + 2
     ws.delete_rows(sheet_row)
     return True
 
@@ -2549,215 +2549,215 @@ with tab_today:
                                         if ok:
                                             st.warning("タスクを削除しました。")
                                             refresh_data_and_rerun()
-                                        else:
-                                            st.error("削除対象が見つかりませんでした。")
+                                    else:
+                                        st.error("削除対象が見つかりませんでした。")
 
-            st.divider()
-            st.markdown("### ⏭ スキップ中のタスク")
+        st.divider()
+        st.markdown("### ⏭ スキップ中のタスク")
 
-            skipped_tasks_df = tasks_df[
-                tasks_df["status"].astype(str) == "スキップ"
-            ].copy()
+        skipped_tasks_df = tasks_df[
+            tasks_df["status"].astype(str) == "スキップ"
+        ].copy()
 
-            if skipped_tasks_df.empty:
-                st.info("スキップ中のタスクはありません。")
-            else:
-                skipped_merged = skipped_tasks_df.merge(
-                    questions_df,
-                    on="question_id",
-                    how="left",
-                    suffixes=("_task", "_question")
+        if skipped_tasks_df.empty:
+            st.info("スキップ中のタスクはありません。")
+        else:
+            skipped_merged = skipped_tasks_df.merge(
+                questions_df,
+                on="question_id",
+                how="left",
+                suffixes=("_task", "_question")
+            )
+
+            skipped_merged["教材"] = skipped_merged["material_id"].apply(
+                lambda x: get_material_name(materials_df, x)
+            )
+
+            skipped_merged["question_number"] = pd.to_numeric(
+                skipped_merged["question_number"],
+                errors="coerce"
+            )
+
+            skipped_merged = skipped_merged.sort_values(
+                ["task_date", "教材", "question_number"]
+            )
+
+            for _, row in skipped_merged.iterrows():
+                question_id = row["question_id"]
+                task_type = row["task_type"]
+                original_date = safe_str(row.get("task_date", ""))
+
+                material_label = safe_str(row.get("教材", ""))
+                qnum = (
+                    int(row["question_number"])
+                    if not pd.isna(row["question_number"])
+                    else ""
                 )
 
-                skipped_merged["教材"] = skipped_merged["material_id"].apply(
-                    lambda x: get_material_name(materials_df, x)
-                )
-
-                skipped_merged["question_number"] = pd.to_numeric(
-                    skipped_merged["question_number"],
-                    errors="coerce"
-                )
-
-                skipped_merged = skipped_merged.sort_values(
-                    ["task_date", "教材", "question_number"]
-                )
-
-                for _, row in skipped_merged.iterrows():
-                    question_id = row["question_id"]
-                    task_type = row["task_type"]
-                    original_date = safe_str(row.get("task_date", ""))
-
-                    material_label = safe_str(row.get("教材", ""))
-                    qnum = (
-                        int(row["question_number"])
-                        if not pd.isna(row["question_number"])
-                        else ""
-                    )
-
-                    st.markdown(
-                        f"""
-                        <div class="sub-card">
-                            <div class="sub-card-title">
-                                ⏭ {material_label} 第{qnum}問
-                            </div>
-                            <div class="sub-card-text">
-                                元の日付：{original_date}<br>
-                                種類：{task_type}
-                            </div>
+                st.markdown(
+                    f"""
+                    <div class="sub-card">
+                        <div class="sub-card-title">
+                            ⏭ {material_label} 第{qnum}問
                         </div>
-                        """,
-                        unsafe_allow_html=True
+                        <div class="sub-card-text">
+                            元の日付：{original_date}<br>
+                            種類：{task_type}
+                        </div>
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                )
+
+                if st.button(
+                    "今日のタスクに戻す",
+                    key=f"restore_skipped_{original_date}_{question_id}_{task_type}",
+                    use_container_width=True
+                ):
+                    update_task_row(
+                        sheets["daily_tasks"],
+                        tasks_df,
+                        original_date,
+                        question_id,
+                        task_type,
+                        {
+                            "task_date": str(today_jst()),
+                            "status": "未完了"
+                        }
                     )
 
-                    if st.button(
-                        "今日のタスクに戻す",
-                        key=f"restore_skipped_{original_date}_{question_id}_{task_type}",
-                        use_container_width=True
-                    ):
-                        update_task_row(
-                            sheets["daily_tasks"],
-                            tasks_df,
-                            original_date,
-                            question_id,
-                            task_type,
-                            {
-                                "task_date": str(today_jst()),
-                                "status": "未完了"
-                            }
+                    st.success("今日のタスクに戻しました！")
+                    refresh_data_and_rerun()
+
+        st.divider()
+        st.markdown("## 🌙 明日の予定プレビュー")
+        st.caption("今日の記録・教材の曜日設定・未着手問題から、明日やる予定を先読みします。")
+
+        tomorrow_preview_df = build_tomorrow_preview_df(materials_df, questions_df, tasks_df)
+
+        if tomorrow_preview_df.empty:
+            st.info("明日の予定はまだありません。")
+        else:
+            task_type_order = ["復習予定", "苦手復習予定", "新規予定"]
+
+            tomorrow_preview_df["表示科目"] = (
+                tomorrow_preview_df["教材"]
+                .astype(str)
+                .str.split("｜")
+                .str[0]
+            )
+
+            subjects = sorted(
+                tomorrow_preview_df["表示科目"]
+                .dropna()
+                .unique()
+                .tolist()
+            )
+
+            for subject in subjects:
+                subject_df = tomorrow_preview_df[
+                    tomorrow_preview_df["表示科目"].astype(str) == subject
+                ]
+
+                if subject_df.empty:
+                    continue
+
+                with st.expander(
+                    f"📚 {subject}：{len(subject_df)}件",
+                    expanded=False
+                ):
+                    for group_type in task_type_order:
+                        group_df = subject_df[
+                            subject_df["task_type"].astype(str) == group_type
+                        ]
+
+                        if group_df.empty:
+                            continue
+
+                        st.markdown(
+                            f'<div class="group-title">📌 {group_type}</div>',
+                            unsafe_allow_html=True
                         )
 
-                        st.success("今日のタスクに戻しました！")
-                        refresh_data_and_rerun()
+                        for _, row in group_df.iterrows():
+                            question_status = row.get("status", "")
+                            material_label = safe_str(row.get("教材", ""))
+                            qnum = int(row["question_number"]) if not pd.isna(row["question_number"]) else ""
 
-            st.divider()
-            st.markdown("## 🌙 明日の予定プレビュー")
-            st.caption("今日の記録・教材の曜日設定・未着手問題から、明日やる予定を先読みします。")
+                            subject_name = safe_str(row.get("表示科目", ""))
+                            style = subject_style(subject_name)
 
-            tomorrow_preview_df = build_tomorrow_preview_df(materials_df, questions_df, tasks_df)
-
-            if tomorrow_preview_df.empty:
-                st.info("明日の予定はまだありません。")
-            else:
-                task_type_order = ["復習予定", "苦手復習予定", "新規予定"]
-
-                tomorrow_preview_df["表示科目"] = (
-                    tomorrow_preview_df["教材"]
-                    .astype(str)
-                    .str.split("｜")
-                    .str[0]
-                )
-
-                subjects = sorted(
-                    tomorrow_preview_df["表示科目"]
-                    .dropna()
-                    .unique()
-                    .tolist()
-                )
-
-                for subject in subjects:
-                    subject_df = tomorrow_preview_df[
-                        tomorrow_preview_df["表示科目"].astype(str) == subject
-                    ]
-
-                    if subject_df.empty:
-                        continue
-
-                    with st.expander(
-                        f"📚 {subject}：{len(subject_df)}件",
-                        expanded=False
-                    ):
-                        for group_type in task_type_order:
-                            group_df = subject_df[
-                                subject_df["task_type"].astype(str) == group_type
-                            ]
-
-                            if group_df.empty:
-                                continue
-
-                            st.markdown(
-                                f'<div class="group-title">📌 {group_type}</div>',
-                                unsafe_allow_html=True
-                            )
-
-                            for _, row in group_df.iterrows():
-                                question_status = row.get("status", "")
-                                material_label = safe_str(row.get("教材", ""))
-                                qnum = int(row["question_number"]) if not pd.isna(row["question_number"]) else ""
-
-                                subject_name = safe_str(row.get("表示科目", ""))
-                                style = subject_style(subject_name)
-
-                                card_html = f"""
-                                <div class="task-card" style="
-                                    padding:1rem;
-                                    border-radius:22px;
-                                    margin-bottom:0.8rem;
-                                    border-left:8px solid {style['border']};
-                                    background:{style['bg']};
-                                    box-shadow:0 14px 32px rgba(15,23,42,0.08);
+                            card_html = f"""
+                            <div class="task-card" style="
+                                padding:1rem;
+                                border-radius:22px;
+                                margin-bottom:0.8rem;
+                                border-left:8px solid {style['border']};
+                                background:{style['bg']};
+                                box-shadow:0 14px 32px rgba(15,23,42,0.08);
+                            ">
+                                <div style="
+                                    display:inline-block;
+                                    padding:0.25rem 0.75rem;
+                                    border-radius:999px;
+                                    font-weight:900;
+                                    margin-bottom:0.5rem;
+                                    background:{style['badge_bg']};
+                                    color:{style['badge_text']};
                                 ">
-                                    <div style="
-                                        display:inline-block;
-                                        padding:0.25rem 0.75rem;
-                                        border-radius:999px;
-                                        font-weight:900;
-                                        margin-bottom:0.5rem;
-                                        background:{style['badge_bg']};
-                                        color:{style['badge_text']};
-                                    ">
-                                        {subject_name}
-                                    </div>
-
-                                    <div style="
-                                        font-size:1.35rem;
-                                        font-weight:900;
-                                        color:#7c2d12;
-                                        line-height:1.35;
-                                        margin-bottom:0.7rem;
-                                    ">
-                                        {material_label}<br>第{qnum}問
-                                    </div>
-
-                                    <span style="
-                                        display:inline-block;
-                                        padding:0.24rem 0.72rem;
-                                        border-radius:999px;
-                                        background:#fff1f2;
-                                        border:1px solid #fecdd3;
-                                        color:#9f1239;
-                                        margin-right:0.3rem;
-                                        margin-bottom:0.3rem;
-                                        font-size:0.85rem;
-                                        font-weight:750;
-                                    ">種類：{group_type}</span>
-
-                                    <span style="
-                                        display:inline-block;
-                                        padding:0.24rem 0.72rem;
-                                        border-radius:999px;
-                                        background:#fff1f2;
-                                        border:1px solid #fecdd3;
-                                        color:#9f1239;
-                                        margin-right:0.3rem;
-                                        margin-bottom:0.3rem;
-                                        font-size:0.85rem;
-                                        font-weight:750;
-                                    ">問題：{question_status}</span>
+                                    {subject_name}
                                 </div>
-                                """
 
-                                st.html(card_html)
+                                <div style="
+                                    font-size:1.35rem;
+                                    font-weight:900;
+                                    color:#7c2d12;
+                                    line-height:1.35;
+                                    margin-bottom:0.7rem;
+                                ">
+                                    {material_label}<br>第{qnum}問
+                                </div>
 
-                                issue = safe_str(row.get("issue", ""))
-                                tags = safe_str(row.get("tags", ""))
-                                user_note = safe_str(row.get("user_note", ""))
+                                <span style="
+                                    display:inline-block;
+                                    padding:0.24rem 0.72rem;
+                                    border-radius:999px;
+                                    background:#fff1f2;
+                                    border:1px solid #fecdd3;
+                                    color:#9f1239;
+                                    margin-right:0.3rem;
+                                    margin-bottom:0.3rem;
+                                    font-size:0.85rem;
+                                    font-weight:750;
+                                ">種類：{group_type}</span>
 
-                                if issue:
-                                    st.write(f"**論点：** {issue}")
-                                if tags:
-                                    st.write(f"**タグ：** {tags}")
-                                if user_note:
-                                    st.write(f"**メモ：** {user_note}")
+                                <span style="
+                                    display:inline-block;
+                                    padding:0.24rem 0.72rem;
+                                    border-radius:999px;
+                                    background:#fff1f2;
+                                    border:1px solid #fecdd3;
+                                    color:#9f1239;
+                                    margin-right:0.3rem;
+                                    margin-bottom:0.3rem;
+                                    font-size:0.85rem;
+                                    font-weight:750;
+                                ">問題：{question_status}</span>
+                            </div>
+                            """
+
+                            st.html(card_html)
+
+                            issue = safe_str(row.get("issue", ""))
+                            tags = safe_str(row.get("tags", ""))
+                            user_note = safe_str(row.get("user_note", ""))
+
+                            if issue:
+                                st.write(f"**論点：** {issue}")
+                            if tags:
+                                st.write(f"**タグ：** {tags}")
+                            if user_note:
+                                st.write(f"**メモ：** {user_note}")
 
 
 
